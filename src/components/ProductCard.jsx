@@ -1,14 +1,16 @@
 import React from "react";
 import { assets } from "../assets/assets";
 import { useAppContext } from "../context/AppContext";
+import { useNavigate } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
+  const navigate = useNavigate();
   const { currency, addToCart, removeFromCart, cartItems } = useAppContext();
 
   if (!product) return null;
 
   return (
-    <div className="border border-gray-300 shadow-md hover:shadow-lg transition-shadow duration-300 rounded-xl px-2 sm:px-4 md:px-6 py-3 sm:py-4 bg-white w-full flex flex-col justify-between cursor-pointer group min-h-[340px]">
+    <div onClick={()=> {navigate(`/products/${product.category.toLowerCase()}/${product._id}`); scroll(0,0)}} className="border border-gray-300 shadow-md hover:shadow-lg transition-shadow duration-300 rounded-xl px-2 sm:px-4 md:px-6 py-3 sm:py-4 bg-white w-full flex flex-col justify-between cursor-pointer group min-h-[340px]">
       <div className="flex-1 flex flex-col items-center justify-center mb-2">
         <img
           className="group-hover:scale-110 transition-transform duration-300 w-24 sm:w-28 md:w-36 rounded-lg object-contain"
