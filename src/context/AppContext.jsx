@@ -43,16 +43,32 @@ export const AppContextProvider = ({ children }) => {
 
   // Remove product from cart
 
-  const removeFromCart = (itemId) => {
-    let cartData = structuredClone(cartItems);
-    if (cartData[itemId]) {
-      cartData[itemId] -= 1;
-      if (cartData[itemId] === 0) {
-        delete cartData[itemId];
+  // const removeFromCart = (itemId) => {
+  //   let cartData = structuredClone(cartItems);
+  //   if (cartData[itemId]) {
+  //     cartData[itemId] -= 1;
+  //     if (cartData[itemId] === 0) {
+  //       delete cartData[itemId];
+  //     }
+  //   }
+  //   toast.success("Remove from Cart");
+  // };
+
+  const removeFromCart = (productId) => {
+    setCartItems((prevItems) => {
+      const currentCount = prevItems[productId] || 0;
+      if (currentCount <= 1) {
+        const { [productId]: _, ...rest } = prevItems;
+        return rest;
       }
-    }
+      return { ...prevItems, [productId]: currentCount - 1 };
+    });
+
     toast.success("Remove from Cart");
   };
+  
+
+
 
   const getCartCount = () => {
     let totalCount = 0;

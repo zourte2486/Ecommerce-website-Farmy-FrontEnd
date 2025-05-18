@@ -86,6 +86,7 @@ const ProductCard = ({ product }) => {
         </div>
 
         {/* Cart Actions */}
+        {/* Cart Actions */}
         <div
           onClick={(e) => e.stopPropagation()}
           className="w-full flex justify-center"
@@ -97,13 +98,15 @@ const ProductCard = ({ product }) => {
               role="button"
               aria-label="Add to cart"
             >
-              <PiShoppingCartSimpleBold color="white" />
               Add
+              <PiShoppingCartSimpleBold color="white" />
             </button>
           ) : (
             <div className="flex items-center gap-3 bg-primary/10 border border-primary/20 rounded-full px-3 py-2 shadow-md">
               <button
-                onClick={() => removeFromCart(product._id)}
+                onClick={() => {
+                  removeFromCart(product._id);
+                }}
                 className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-primary font-bold text-xl hover:bg-red-100 hover:text-red-500 transition-colors focus:outline-none"
                 aria-label="Decrease quantity"
               >
