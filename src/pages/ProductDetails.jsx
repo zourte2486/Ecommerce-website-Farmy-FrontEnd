@@ -148,7 +148,7 @@ const ProductDetails = () => {
           <div className="flex gap-4">
             <button
               onClick={() => addToCart(selectedProduct._id)}
-              className="flex-1 bg-primary hover:bg-primary-dull text-white font-semibold py-3 px-6 rounded-lg transition"
+              className="flex-1 font-semibold py-3 px-6 bg-gray-100 text-gray-800/80 hover:bg-gray-200 rounded-lg transition"
             >
               Add to Cart 
             </button>

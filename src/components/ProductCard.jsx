@@ -37,12 +37,14 @@ const ProductCard = ({ product }) => {
           <span className="text-xs text-gray-400">(4)</span>
         </div>
         <div className="flex items-end justify-between mt-2">
-          <p className="md:text-xl text-base font-bold text-primary">
+        
+          <p className="md:text-xl text-base font-bold text-primary block">
             {currency}MAD{product.offerPrice}
             <span className="text-gray-400 md:text-sm text-xs line-through ml-2 font-normal">
               {currency}MAD{product.price}
             </span>
           </p>
+          
           <div
             onClick={(e) => {
               e.stopPropagation();
