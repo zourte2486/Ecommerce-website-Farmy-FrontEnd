@@ -29,7 +29,7 @@ const Navbar = () => {
   });
 
   return (
-    <nav className="flex items-center justify-between px-6 md:px-16 lg:px-24 xl:px-32 py-4 border-b border-gray-300 bg-white relative transition-all z-10">
+    <nav className="flex items-center justify-between px-6 md:px-16 lg:px-24 xl:px-32 py-4 border-b border-gray-300 bg-white relative transition-all z-20">
       <NavLink to="/" onClick={() => setOpen(false)}>
         <img className="h-9" src={assets.logo} alt="logo" />
       </NavLink>
@@ -74,7 +74,7 @@ const Navbar = () => {
         ) : (
           <div className="relative group">
             <img src={assets.profile_icon} alt="" className="w-10" />
-            <ul className="hidden group-hover:block absolute top-10 right-0 bg-white shadow border border-gray-200 py-2.5 w-30 rounded-md test-sm z-40">
+            <ul className="hidden group-hover:block absolute top-10 right-0 bg-white shadow border border-gray-200 py-2.5 w-30 rounded-md test-sm z-30">
               <li
                 onClick={() => navigate("my-orders")}
                 className="p-1.5 pl-3 hover:bg-primary/10 cursor-pointer"
@@ -119,24 +119,42 @@ const Navbar = () => {
         <div
           className={`${
             open ? "flex" : "hidden"
-          } absolute top-[60px] left-0 w-full bg-white shadow-md py-4 flex-col items-start gap-2 px-5 text-sm md:hidden`}
+          } absolute top-[60px] left-0 w-full bg-white shadow-lg py-6 flex-col items-start gap-4 px-6 text-sm md:hidden z-30 transition-all duration-300 ease-in-out`}
         >
-          <NavLink to="/" onClick={() => setOpen(false)}>
+          <NavLink
+            to="/"
+            onClick={() => setOpen(false)}
+            className="w-full py-2 hover:text-primary transition-colors duration-200"
+          >
             Home
           </NavLink>
-          <NavLink to="/products" onClick={() => setOpen(false)}>
-            All Product
+          <NavLink
+            to="/products"
+            onClick={() => setOpen(false)}
+            className="w-full py-2 hover:text-primary transition-colors duration-200"
+          >
+            All Products
           </NavLink>
 
           {user && (
-            <NavLink to="/products" onClick={() => setOpen(false)}>
+            <NavLink
+              to="/my-orders"
+              onClick={() => setOpen(false)}
+              className="w-full py-2 hover:text-primary transition-colors duration-200"
+            >
               My Orders
             </NavLink>
           )}
 
-          <NavLink to="/" onClick={() => setOpen(false)}>
+          <NavLink
+            to="/"
+            onClick={() => setOpen(false)}
+            className="w-full py-2 hover:text-primary transition-colors duration-200"
+          >
             Contact
           </NavLink>
+
+          <div className="w-full border-t border-gray-200 my-2"></div>
 
           {!user ? (
             <button
@@ -144,16 +162,17 @@ const Navbar = () => {
                 setOpen(false);
                 setshowUserLogin(true);
               }}
-              className="cursor-pointer px-6 py-2 mt-2 bg-primary hover:bg-dull transition text-white rounded-full text-sm"
+              className="w-full cursor-pointer px-6 py-3 bg-primary hover:bg-dull transition-all duration-200 text-white rounded-lg text-sm font-medium"
             >
               Login
             </button>
           ) : (
             <button
               onClick={() => {
-                logout;
+                logout();
+                setOpen(false);
               }}
-              className="cursor-pointer px-6 py-2 mt-2 bg-primary hover:bg-dull transition text-white rounded-full text-sm"
+              className="w-full cursor-pointer px-6 py-3 bg-primary hover:bg-dull transition-all duration-200 text-white rounded-lg text-sm font-medium"
             >
               Logout
             </button>
