@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const SellerLayout = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const dashboardIcon = (
@@ -91,6 +92,10 @@ const SellerLayout = ({ children }) => {
     { name: "Orders List", path: "/seller/orders", icon: ordersIcon },
   ];
 
+  const handleLogout = () => {
+    navigate("/");
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
@@ -129,7 +134,7 @@ const SellerLayout = ({ children }) => {
               to={item.path}
               className={`flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 ${
                 location.pathname === item.path
-                  ? "bg-indigo-50 text-indigo-600 border-r-4 border-indigo-600"
+                  ? "bg-[#4fbf8b]/10 text-[#4fbf8b] border-r-4 border-[#4fbf8b]"
                   : ""
               }`}
             >
@@ -151,7 +156,10 @@ const SellerLayout = ({ children }) => {
             </h1>
             <div className="flex items-center space-x-4">
               <span className="text-gray-600">Welcome, Admin</span>
-              <button className="px-4 py-2 text-sm text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 text-sm text-white bg-[#4fbf8b] rounded-lg hover:bg-[#44ae7c] transition-colors"
+              >
                 Logout
               </button>
             </div>

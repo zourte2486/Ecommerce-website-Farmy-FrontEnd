@@ -339,7 +339,6 @@ export const dummyProducts = [
     _id: "ek54j45k",
     name: "Mango 1 kg",
     category: "Fruits",
-
     price: 150,
     offerPrice: 140,
     image: [mango_image_1],
@@ -703,7 +702,6 @@ export const dummyProducts = [
     _id: "in01f25u",
     name: "Maggi Noodles 280g",
     category: "Instant",
-
     price: 55,
     offerPrice: 50,
     image: [maggi_image],
@@ -839,5 +837,102 @@ export const dummyOrders = [
     isPaid: false,
     createdAt: "2025-03-25T07:17:13.068Z",
     updatedAt: "2025-03-25T07:17:13.068Z",
+  },
+  {
+    _id: "67e2589a8f87e63366786402",
+    userId: "67b5880e4d09769c5ca61644",
+    items: [
+      {
+        product: dummyProducts[5],
+        quantity: 3,
+        _id: "67e2589a8f87e63366786403",
+      },
+      {
+        product: dummyProducts[6],
+        quantity: 2,
+        _id: "67e2589a8f87e63366786404",
+      },
+    ],
+    amount: 320,
+    address: dummyAddress[0],
+    status: "Delivered",
+    paymentType: "Online",
+    isPaid: true,
+    createdAt: "2025-03-24T10:15:46.018Z",
+    updatedAt: "2025-03-24T11:30:13.103Z",
+  },
+  {
+    _id: "67e2589a8f87e63366786405",
+    userId: "67b5880e4d09769c5ca61644",
+    items: [
+      {
+        product: dummyProducts[10],
+        quantity: 2,
+        _id: "67e2589a8f87e63366786406",
+      },
+      {
+        product: dummyProducts[11],
+        quantity: 1,
+        _id: "67e2589a8f87e63366786407",
+      },
+      {
+        product: dummyProducts[12],
+        quantity: 1,
+        _id: "67e2589a8f87e63366786408",
+      },
+    ],
+    amount: 315,
+    address: dummyAddress[0],
+    status: "Out for Delivery",
+    paymentType: "Online",
+    isPaid: true,
+    createdAt: "2025-03-25T08:20:46.018Z",
+    updatedAt: "2025-03-25T09:45:13.103Z",
+  },
+  {
+    _id: "67e2589a8f87e63366786409",
+    userId: "67b5880e4d09769c5ca61644",
+    items: [
+      {
+        product: dummyProducts[15],
+        quantity: 2,
+        _id: "67e2589a8f87e63366786410",
+      },
+      {
+        product: dummyProducts[16],
+        quantity: 2,
+        _id: "67e2589a8f87e63366786411",
+      },
+    ],
+    amount: 296,
+    address: dummyAddress[0],
+    status: "Processing",
+    paymentType: "COD",
+    isPaid: false,
+    createdAt: "2025-03-25T09:30:46.018Z",
+    updatedAt: "2025-03-25T09:30:46.018Z",
+  },
+  {
+    _id: "67e2589a8f87e63366786412",
+    userId: "67b5880e4d09769c5ca61644",
+    items: [
+      {
+        product: dummyProducts[20],
+        quantity: 1,
+        _id: "67e2589a8f87e63366786413",
+      },
+      {
+        product: dummyProducts[21],
+        quantity: 2,
+        _id: "67e2589a8f87e63366786414",
+      },
+    ],
+    amount: 130,
+    address: dummyAddress[0],
+    status: "Cancelled",
+    paymentType: "Online",
+    isPaid: false,
+    createdAt: "2025-03-23T15:20:46.018Z",
+    updatedAt: "2025-03-23T16:45:13.103Z",
   },
 ];
