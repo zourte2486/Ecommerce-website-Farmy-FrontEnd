@@ -39,7 +39,7 @@ return (
             </div>
         </div>
         <p className="py-4 text-center text-sm md:text-base text-gray-500/80">
-            Copyright {currentYear} © GreenCart All Right Reserved.
+            Copyright {currentYear} © Farmy All Right Reserved.
         </p>
     </div>
 );
