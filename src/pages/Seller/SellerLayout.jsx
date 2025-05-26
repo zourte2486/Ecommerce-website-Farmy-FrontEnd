@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useAppContext } from "../../context/AppContext";
+import { toast } from "react-hot-toast";
 
 const SellerLayout = ({ children }) => {
+  const { axios, navigate } = useAppContext();
   const location = useLocation();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const dashboardIcon = (
@@ -92,8 +95,18 @@ const SellerLayout = ({ children }) => {
     { name: "Orders List", path: "/seller/orders", icon: ordersIcon },
   ];
 
-  const handleLogout = () => {
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      const { data } = await axios.get("/api/seller/logout");
+      if (data.success) {
+        toast.success(data.message);
+        navigate("/");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   return (

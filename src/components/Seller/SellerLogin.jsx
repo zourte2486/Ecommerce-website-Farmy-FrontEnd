@@ -3,9 +3,10 @@ import { useAppContext } from "./../../context/AppContext";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const SellerLogin = () => {
-  const { isSeller, setIsSeller } = useAppContext();
+  const { isSeller, setIsSeller, axios } = useAppContext();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,21 +18,23 @@ const SellerLogin = () => {
     }
   }, [isSeller, navigate]);
 
-  const onSubmitHandler = (e) => {
+  const onSubmitHandler = async (e) => {
     e.preventDefault();
-    // Example validation (replace with real logic)
-    if (!email || !password) {
-      setError("Please fill in all fields.");
-      return;
-    }
+    setError("");
 
-    // For demo purposes, we'll just set the seller as logged in
-    if (email === "seller@example.com" && password === "password") {
-      setError("");
-      setIsSeller(true);
-      navigate("/seller");
-    } else {
-      setError("Invalid email or password");
+    try {
+      const { data } = await axios.post("/api/seller/login", {
+        email,
+        password,
+      });
+      if (data.success) {
+        setIsSeller(true);
+        navigate("/seller");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
     }
   };
 
@@ -78,9 +81,6 @@ const SellerLogin = () => {
           >
             Login
           </button>
-          <p className="text-xs text-gray-500 text-center w-full">
-            Demo credentials: seller@example.com / password
-          </p>
         </div>
       </form>
     )

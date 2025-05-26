@@ -1,117 +1,327 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { useAppContext } from "./../../context/AppContext";
+import { toast } from "react-hot-toast";
 
 const ProductsList = () => {
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: "Organic Tomatoes",
-      price: 2.99,
-      stock: true,
-      image:
-        "https://images.unsplash.com/photo-1546094097-246e4ca9b952?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    },
-    {
-      id: 2,
-      name: "Fresh Spinach",
-      price: 3.49,
-      stock: false,
-      image:
-        "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    },
-    {
-      id: 3,
-      name: "Organic Carrots",
-      price: 1.99,
-      stock: true,
-      image:
-        "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    },
-  ]);
+  const { products, axios, fetchProducts } = useAppContext();
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    price: "",
+    offerPrice: "",
+    category: "",
+    inStock: true,
+  });
 
-  const toggleStock = (productId) => {
-    setProducts(
-      products.map((product) =>
-        product.id === productId
-          ? { ...product, stock: !product.stock }
-          : product
-      )
-    );
+  const handleStockToggle = async (productId, currentStatus) => {
+    try {
+      const { data } = await axios.post("/api/product/stock", {
+        id: productId,
+        inStock: !currentStatus,
+      });
+
+      if (data.success) {
+        toast.success(data.message);
+        fetchProducts(); // Refresh the products list
+      } else {
+        toast.error(data.message || "Failed to update stock status");
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to update stock status"
+      );
+    }
+  };
+
+  const handleDelete = async (productId) => {
+    try {
+      const { data } = await axios.delete("/api/product/delete", {
+        data: { id: productId },
+      });
+
+      if (data.success) {
+        toast.success(data.message);
+        fetchProducts(); // Refresh the products list
+      } else {
+        toast.error(data.message || "Failed to delete product");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete product");
+    }
+  };
+
+  const handleEdit = (product) => {
+    setEditingProduct(product._id);
+    setEditForm({
+      name: product.name,
+      price: product.price,
+      offerPrice: product.offerPrice || "",
+      category: product.category,
+      inStock: product.inStock,
+    });
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const { data } = await axios.put("/api/product/update", {
+        id: editingProduct,
+        productData: {
+          ...editForm,
+          price: parseFloat(editForm.price),
+          offerPrice: editForm.offerPrice
+            ? parseFloat(editForm.offerPrice)
+            : null,
+        },
+      });
+
+      if (data.success) {
+        toast.success(data.message);
+        setEditingProduct(null);
+        fetchProducts();
+      } else {
+        toast.error(data.message || "Failed to update product");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update product");
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditingProduct(null);
+    setEditForm({
+      name: "",
+      price: "",
+      offerPrice: "",
+      category: "",
+      inStock: true,
+    });
   };
 
   return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="p-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-          Products List
-        </h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Product
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stock Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {products.map((product) => (
-                <tr key={product.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 flex-shrink-0">
-                        <img
-                          className="h-10 w-10 rounded-full object-cover"
-                          src={product.image}
-                          alt={product.name}
-                        />
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
-                          {product.name}
+    <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="flex flex-col items-start w-full mb-8">
+        <h2 className="text-2xl font-semibold text-gray-800">Products List</h2>
+        <div className="w-16 h-0.5 bg-gray-200 rounded-full mt-2"></div>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead>
+            <tr>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                Product
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                Category
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                Price
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                Offer Price
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                Stock Status
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {products.map((product) => (
+              <tr
+                key={product._id}
+                className="hover:bg-gray-50 transition-colors duration-200"
+              >
+                {editingProduct === product._id ? (
+                  <>
+                    <td colSpan="6" className="px-6 py-4 bg-gray-50">
+                      <form onSubmit={handleEditSubmit} className="space-y-4">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Name
+                            </label>
+                            <input
+                              type="text"
+                              value={editForm.name}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  name: e.target.value,
+                                })
+                              }
+                              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Category
+                            </label>
+                            <input
+                              type="text"
+                              value={editForm.category}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  category: e.target.value,
+                                })
+                              }
+                              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Price
+                            </label>
+                            <input
+                              type="number"
+                              value={editForm.price}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  price: e.target.value,
+                                })
+                              }
+                              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Offer Price
+                            </label>
+                            <input
+                              type="number"
+                              value={editForm.offerPrice}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  offerPrice: e.target.value,
+                                })
+                              }
+                              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Stock Status
+                            </label>
+                            <div className="flex items-center mt-2">
+                              <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={editForm.inStock}
+                                  onChange={(e) =>
+                                    setEditForm({
+                                      ...editForm,
+                                      inStock: e.target.checked,
+                                    })
+                                  }
+                                  className="sr-only peer"
+                                />
+                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                <span className="ml-3 text-sm text-gray-600">
+                                  {editForm.inStock
+                                    ? "In Stock"
+                                    : "Out of Stock"}
+                                </span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex justify-end space-x-3 mt-6">
+                          <button
+                            type="button"
+                            onClick={handleEditCancel}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-all duration-200"
+                          >
+                            Save Changes
+                          </button>
+                        </div>
+                      </form>
+                    </td>
+                  </>
+                ) : (
+                  <>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 flex-shrink-0">
+                          <img
+                            className="h-10 w-10 rounded-lg object-cover"
+                            src={product.image[0]}
+                            alt={product.name}
+                          />
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">
+                            {product.name}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      ${product.price}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={product.stock}
-                        onChange={() => toggleStock(product.id)}
-                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                      />
-                      <span className="ml-2 text-sm text-gray-500">
-                        {product.stock ? "In Stock" : "Out of Stock"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="px-2.5 py-0.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-full">
+                        {product.category}
                       </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <button className="text-indigo-600 hover:text-indigo-900 mr-4">
-                      Edit
-                    </button>
-                    <button className="text-red-600 hover:text-red-900">
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        ${product.price}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {product.offerPrice ? `$${product.offerPrice}` : "-"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={product.inStock}
+                            onChange={() =>
+                              handleStockToggle(product._id, product.inStock)
+                            }
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                          <span className="ml-3 text-sm text-gray-600">
+                            {product.inStock ? "In Stock" : "Out of Stock"}
+                          </span>
+                        </label>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <button
+                        onClick={() => handleEdit(product)}
+                        className="text-blue-600 hover:text-blue-800 mr-4 transition-colors duration-200"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(product._id)}
+                        className="text-red-600 hover:text-red-800 transition-colors duration-200"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

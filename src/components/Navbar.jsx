@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router";
+import { NavLink } from "react-router-dom";
 import { assets } from "./../assets/assets";
 import { useAppContext } from "./../context/AppContext";
 import { useEffect } from "react";
+import { toast } from 'react-hot-toast';
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -14,19 +15,37 @@ const Navbar = () => {
     searchQuery,
     setsearchQuery,
     getCartCount,
-    getCartAmount,
+    axios,
+    setCartItems,
   } = useAppContext();
 
   const logout = async () => {
-    setUser(null);
-    navigate("/");
+    try {
+      const { data } = await axios.get("/api/user/logout", {
+        withCredentials: true,
+      });
+      if (data.success) {
+        setUser(null);
+        setCartItems({});
+        navigate("/", { replace: true });
+        setOpen(false);
+        toast.success("Logout successful");
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Even if the server request fails, clear the local state
+      setUser(null);
+      setCartItems({});
+      navigate("/", { replace: true });
+      setOpen(false);
+    }
   };
 
   useEffect(() => {
     if (searchQuery.length > 0) {
       navigate("/products");
     }
-  });
+  }, [searchQuery, navigate]);
 
   return (
     <nav className="flex items-center justify-between px-6 md:px-16 lg:px-24 xl:px-32 py-4 border-b border-gray-300 bg-white relative transition-all z-20">
@@ -36,9 +55,24 @@ const Navbar = () => {
 
       {/* Desktop Menu */}
       <div className="hidden sm:flex items-center gap-8">
-        <NavLink to="/">Home</NavLink>
-        <NavLink to="/products">All Product</NavLink>
-        <NavLink to="/">Contact</NavLink>
+        <NavLink
+          to="/"
+          className={({ isActive }) => (isActive ? "text-primary" : "")}
+        >
+          Home
+        </NavLink>
+        <NavLink
+          to="/products"
+          className={({ isActive }) => (isActive ? "text-primary" : "")}
+        >
+          All Product
+        </NavLink>
+        <NavLink
+          to="/"
+          className={({ isActive }) => (isActive ? "text-primary" : "")}
+        >
+          Contact
+        </NavLink>
 
         <div className="hidden lg:flex items-center text-sm gap-2 border border-gray-300 px-3 rounded-full">
           <input
@@ -76,7 +110,7 @@ const Navbar = () => {
             <img src={assets.profile_icon} alt="" className="w-10" />
             <ul className="hidden group-hover:block absolute top-10 right-0 bg-white shadow border border-gray-200 py-2.5 w-30 rounded-md test-sm z-30">
               <li
-                onClick={() => navigate("my-orders")}
+                onClick={() => navigate("/my-orders")}
                 className="p-1.5 pl-3 hover:bg-primary/10 cursor-pointer"
               >
                 My Orders
@@ -124,14 +158,22 @@ const Navbar = () => {
           <NavLink
             to="/"
             onClick={() => setOpen(false)}
-            className="w-full py-2 hover:text-primary transition-colors duration-200"
+            className={({ isActive }) =>
+              `w-full py-2 hover:text-primary transition-colors duration-200 ${
+                isActive ? "text-primary" : ""
+              }`
+            }
           >
             Home
           </NavLink>
           <NavLink
             to="/products"
             onClick={() => setOpen(false)}
-            className="w-full py-2 hover:text-primary transition-colors duration-200"
+            className={({ isActive }) =>
+              `w-full py-2 hover:text-primary transition-colors duration-200 ${
+                isActive ? "text-primary" : ""
+              }`
+            }
           >
             All Products
           </NavLink>
@@ -140,7 +182,11 @@ const Navbar = () => {
             <NavLink
               to="/my-orders"
               onClick={() => setOpen(false)}
-              className="w-full py-2 hover:text-primary transition-colors duration-200"
+              className={({ isActive }) =>
+                `w-full py-2 hover:text-primary transition-colors duration-200 ${
+                  isActive ? "text-primary" : ""
+                }`
+              }
             >
               My Orders
             </NavLink>
@@ -149,7 +195,11 @@ const Navbar = () => {
           <NavLink
             to="/"
             onClick={() => setOpen(false)}
-            className="w-full py-2 hover:text-primary transition-colors duration-200"
+            className={({ isActive }) =>
+              `w-full py-2 hover:text-primary transition-colors duration-200 ${
+                isActive ? "text-primary" : ""
+              }`
+            }
           >
             Contact
           </NavLink>

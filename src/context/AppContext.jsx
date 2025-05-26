@@ -1,24 +1,73 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { dummyProducts } from "../assets/assets";
 import toast from "react-hot-toast";
+import axios from "axios";
+
+// Configure axios defaults
+axios.defaults.withCredentials = true;
+axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 
 export const AppContext = createContext();
 
 export const AppContextProvider = ({ children }) => {
-  const currency = import.meta.VITE_CURRENCY;
-
+  const currency = import.meta.env.VITE_CURRENCY;
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isSeller, setIsSeller] = useState(false);
   const [showUserLogin, setshowUserLogin] = useState(false);
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState({});
-  const [searchQuery, setsearchQuery] = useState({});
+  const [searchQuery, setsearchQuery] = useState("");
+
+  // fetch user auth status, user data, cart items
+  const fetchUser = async () => {
+    try {
+      const { data } = await axios.get("/api/user/is-auth", {
+        withCredentials: true,
+      });
+      if (data.success) {
+        setUser(data.user);
+        setCartItems(data.user.cartItems || {});
+      } else {
+        setUser(null);
+        setCartItems({});
+      }
+    } catch (error) {
+      // Don't log 401 errors as they're expected when not logged in
+      if (error.response?.status !== 401) {
+        console.error("Auth check error:", error);
+      }
+      setUser(null);
+      setCartItems({});
+    }
+  };
+
+  // fetch seller status
+  const fetchSeller = async () => {
+    try {
+      const { data } = await axios.get("/api/seller/is-auth", {
+        withCredentials: true,
+      });
+      setIsSeller(data.success);
+    } catch (error) {
+      console.error("Seller auth check error:", error);
+      setIsSeller(false);
+    }
+  };
 
   // fetch all products
   const fetchProducts = async () => {
-    setProducts(dummyProducts);
+    try {
+      const { data } = await axios.get("/api/product/list");
+      if (data.success) {
+        setProducts(data.products);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.error("Products fetch error:", error);
+      toast.error("Failed to fetch products");
+    }
   };
 
   const addToCart = (itemId) => {
@@ -41,19 +90,6 @@ export const AppContextProvider = ({ children }) => {
     toast.success("Cart Updated");
   };
 
-  // Remove product from cart
-
-  // const removeFromCart = (itemId) => {
-  //   let cartData = structuredClone(cartItems);
-  //   if (cartData[itemId]) {
-  //     cartData[itemId] -= 1;
-  //     if (cartData[itemId] === 0) {
-  //       delete cartData[itemId];
-  //     }
-  //   }
-  //   toast.success("Remove from Cart");
-  // };
-
   const removeFromCart = (productId) => {
     setCartItems((prevItems) => {
       const currentCount = prevItems[productId] || 0;
@@ -66,9 +102,6 @@ export const AppContextProvider = ({ children }) => {
 
     toast.success("Remove from Cart");
   };
-  
-
-
 
   const getCartCount = () => {
     let totalCount = 0;
@@ -89,8 +122,17 @@ export const AppContextProvider = ({ children }) => {
     return Math.floor(totalAmount * 100) / 100;
   };
 
+  // Check auth status on mount
   useEffect(() => {
-    fetchProducts();
+    const initializeApp = async () => {
+      try {
+        await Promise.all([fetchUser(), fetchSeller(), fetchProducts()]);
+      } catch (error) {
+        console.error("Initialization error:", error);
+      }
+    };
+
+    initializeApp();
   }, []);
 
   const value = {
@@ -113,6 +155,8 @@ export const AppContextProvider = ({ children }) => {
     setsearchQuery,
     getCartCount,
     getCartAmount,
+    axios,
+    fetchProducts,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
