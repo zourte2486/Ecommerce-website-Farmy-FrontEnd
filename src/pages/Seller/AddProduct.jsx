@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAppContext } from "./../../context/AppContext";
 import { toast } from "react-hot-toast";
+import { categories } from "../../assets/assets";
 
 const AddProduct = () => {
   const [files, setFiles] = useState([]);
@@ -14,6 +15,18 @@ const AddProduct = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { axios } = useAppContext();
+
+  // Filter categories to show only the specified ones
+  const filteredCategories = categories.filter((category) =>
+    [
+      "Organic veggies",
+      "Fresh Fruits",
+      "Cold Drinks",
+      "Dairy Products",
+      "Bakery & Breads",
+      "Grains & Cereals",
+    ].includes(category.text)
+  );
 
   const handleInputChange = (e) => {
     const { name, value, checked } = e.target;
@@ -107,16 +120,22 @@ const AddProduct = () => {
         return;
       }
 
+      // Format description as an array of strings
+      const descriptionArray = description
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line !== "");
+
       const productData = {
         name: name.trim(),
-        description: description
-          .split("\n")
-          .filter((line) => line.trim() !== ""),
+        description: descriptionArray,
         price: parseFloat(price),
         category,
         offerPrice: offerPrice ? parseFloat(offerPrice) : null,
-        stock,
+        inStock: stock,
       };
+
+      console.log("Submitting product data:", productData); // Debug log
 
       const formData = new FormData();
       formData.append("productData", JSON.stringify(productData));
@@ -124,6 +143,11 @@ const AddProduct = () => {
       files.forEach((file) => {
         formData.append("image", file);
       });
+
+      console.log("FormData contents:", {
+        productData: formData.get("productData"),
+        imageCount: files.length,
+      }); // Debug log
 
       const { data } = await axios.post("/api/product/add", formData, {
         headers: {
@@ -152,15 +176,33 @@ const AddProduct = () => {
         toast.error(data.message || "Failed to add product");
       }
     } catch (error) {
-      console.error("Error adding product:", error);
+      console.error("Error details:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        headers: error.response?.headers,
+      });
+
       if (error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else if (error.response?.status === 413) {
         toast.error("File size too large. Please upload smaller images.");
       } else if (error.response?.status === 415) {
         toast.error("Invalid file type. Please upload image files only.");
+      } else if (error.response?.status === 401) {
+        toast.error("Please login to add products");
+      } else if (error.response?.status === 403) {
+        toast.error("You don't have permission to add products");
+      } else if (error.response?.status === 404) {
+        toast.error(
+          "API endpoint not found. Please check the server configuration."
+        );
+      } else if (error.response?.status === 500) {
+        toast.error("Server error. Please try again later.");
       } else {
-        toast.error("Failed to add product. Please try again.");
+        toast.error(
+          error.message || "Failed to add product. Please try again."
+        );
       }
     } finally {
       setIsLoading(false);
@@ -265,10 +307,11 @@ const AddProduct = () => {
                 required
               >
                 <option value="">Select a category</option>
-                <option value="vegetables">Vegetables</option>
-                <option value="fruits">Fruits</option>
-                <option value="dairy">Dairy</option>
-                <option value="meat">Meat</option>
+                {filteredCategories.map((cat, index) => (
+                  <option key={index} value={cat.path}>
+                    {cat.text}
+                  </option>
+                ))}
               </select>
             </div>
 

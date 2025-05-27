@@ -27,6 +27,18 @@ const Categories = () => {
     },
   };
 
+  // Filter categories to show only the specified ones
+  const filteredCategories = categories.filter((category) =>
+    [
+      "Organic veggies",
+      "Fresh Fruits",
+      "Cold Drinks",
+      "Dairy Products",
+      "Bakery & Breads",
+      "Grains & Cereals",
+    ].includes(category.text)
+  );
+
   return (
     <div className="mt-16 px-4 md:px-6 lg:px-8">
       <motion.p
@@ -41,9 +53,9 @@ const Categories = () => {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 mt-6 gap-4 md:gap-6"
+        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 mt-6 gap-4 md:gap-6"
       >
-        {categories.map((category, index) => (
+        {filteredCategories.map((category, index) => (
           <motion.div
             key={index}
             variants={itemVariants}
