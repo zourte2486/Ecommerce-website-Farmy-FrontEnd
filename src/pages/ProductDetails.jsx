@@ -42,7 +42,10 @@ const ProductDetails = () => {
 
   const productImages = [selectedProduct.image, selectedProduct.image];
   const relatedProducts = products
-    .filter((p) => p.category === selectedProduct.category && p._id !== selectedProduct._id)
+    .filter(
+      (p) =>
+        p.category === selectedProduct.category && p._id !== selectedProduct._id
+    )
     .slice(0, 4);
 
   return (
@@ -54,10 +57,21 @@ const ProductDetails = () => {
     >
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-        <Link to="/" className="hover:text-primary">Home</Link> /
-        <Link to="/products" className="hover:text-primary">Products</Link> /
-        <Link to={`/products/${category}`} className="hover:text-primary capitalize">{category}</Link> /
-        <span className="text-primary">{selectedProduct.name}</span>
+        <Link to="/" className="hover:text-primary">
+          Home
+        </Link>{" "}
+        /
+        <Link to="/products" className="hover:text-primary">
+          Products
+        </Link>{" "}
+        /
+        <Link
+          to={`/products/${category}`}
+          className="hover:text-primary capitalize"
+        >
+          {category}
+        </Link>{" "}
+        /<span className="text-primary">{selectedProduct.name}</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
@@ -72,7 +86,11 @@ const ProductDetails = () => {
                   selectedImage === idx ? "border-primary" : "border-gray-200"
                 }`}
               >
-                <img src={img} alt={`${selectedProduct.name} ${idx + 1}`} className="w-full h-full object-contain p-1" />
+                <img
+                  src={img}
+                  alt={`${selectedProduct.name} ${idx + 1}`}
+                  className="w-full h-full object-contain p-1"
+                />
               </motion.div>
             ))}
           </div>
@@ -88,30 +106,37 @@ const ProductDetails = () => {
         {/* Info */}
         <motion.div className="space-y-6">
           <div>
-            <p className="text-sm text-primary uppercase">{selectedProduct.category}</p>
-            <h1 className="text-3xl font-bold text-gray-800 mt-1">{selectedProduct.name}</h1>
+            <p className="text-sm text-primary uppercase">
+              {selectedProduct.category}
+            </p>
+            <h1 className="text-3xl font-bold text-gray-800 mt-1">
+              {selectedProduct.name}
+            </h1>
           </div>
 
           <div className="flex items-center gap-2">
-            {Array(5).fill("").map((_, i) => (
-              <img
-                key={i}
-                src={i < 4 ? assets.star_icon : assets.star_dull_icon}
-                alt="rating"
-                className="w-5"
-              />
-            ))}
+            {Array(5)
+              .fill("")
+              .map((_, i) => (
+                <img
+                  key={i}
+                  src={i < 4 ? assets.star_icon : assets.star_dull_icon}
+                  alt="rating"
+                  className="w-5"
+                />
+              ))}
             <span className="ml-2 text-gray-500 text-sm">(4)</span>
           </div>
 
           <div>
-            <p className="line-through text-gray-400 text-lg">
-              ${selectedProduct.price}
-            </p>
-            <p className="text-2xl font-bold text-primary">
-              ${selectedProduct.offerPrice}
-              <span className="ml-2 text-sm text-gray-500">(incl. taxes)</span>
-            </p>
+            <div className="text-2xl font-bold text-gray-900">
+              MAD {selectedProduct.price}
+            </div>
+            {selectedProduct.offerPrice && (
+              <div className="text-lg text-gray-500 line-through">
+                MAD {selectedProduct.offerPrice}
+              </div>
+            )}
           </div>
 
           <div>
@@ -127,7 +152,10 @@ const ProductDetails = () => {
           <div className="flex gap-4 items-center mb-4">
             <div className="flex bg-gray-100 rounded-lg px-4 py-2 items-center justify-between w-32">
               <button
-                onClick={() => cartItems[selectedProduct._id] > 0 && removeFromCart(selectedProduct._id)}
+                onClick={() =>
+                  cartItems[selectedProduct._id] > 0 &&
+                  removeFromCart(selectedProduct._id)
+                }
                 className="text-xl font-bold text-primary hover:text-red-500"
               >
                 -
@@ -150,7 +178,7 @@ const ProductDetails = () => {
               onClick={() => addToCart(selectedProduct._id)}
               className="flex-1 font-semibold py-3 px-6 bg-gray-100 text-gray-800/80 hover:bg-gray-200 rounded-lg transition"
             >
-              Add to Cart 
+              Add to Cart
             </button>
             <button
               onClick={() => {
@@ -163,8 +191,16 @@ const ProductDetails = () => {
             </button>
           </div>
 
-          <p className={`flex items-center gap-2 ${selectedProduct.inStock ? "text-green-600" : "text-red-500"}`}>
-            <span className={`w-2 h-2 rounded-full ${selectedProduct.inStock ? "bg-green-600" : "bg-red-500"}`} />
+          <p
+            className={`flex items-center gap-2 ${
+              selectedProduct.inStock ? "text-green-600" : "text-red-500"
+            }`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${
+                selectedProduct.inStock ? "bg-green-600" : "bg-red-500"
+              }`}
+            />
             {selectedProduct.inStock ? "In Stock" : "Out of Stock"}
           </p>
         </motion.div>
@@ -173,7 +209,9 @@ const ProductDetails = () => {
       {/* Related Products */}
       {relatedProducts.length > 0 && (
         <div className="mt-12 border-t pt-8">
-          <h2 className="text-2xl font-bold text-primary-dull mb-6">Related Products</h2>
+          <h2 className="text-2xl font-bold text-primary-dull mb-6">
+            Related Products
+          </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
             {relatedProducts.map((product, idx) => (
               <motion.div key={product._id} variants={fadeIn} custom={idx}>
@@ -197,4 +235,3 @@ const ProductDetails = () => {
 };
 
 export default ProductDetails;
-

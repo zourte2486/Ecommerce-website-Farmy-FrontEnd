@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import { assets } from "./../assets/assets";
 import { useAppContext } from "./../context/AppContext";
 import { useEffect } from "react";
-import { toast } from 'react-hot-toast';
+import { toast } from "react-hot-toast";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);

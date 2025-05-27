@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { assets } from "../assets/assets";
 import { useAppContext } from "../context/AppContext";
 import { toast } from "react-hot-toast";
@@ -17,34 +17,81 @@ const InputField = ({ type, placeholder, name, handleChange, address }) => (
 );
 
 const AddAddress = () => {
+  const {
+    axios,
+    addresses = [],
+    setAddresses,
+    navigate,
+    user,
+  } = useAppContext();
+
   const [address, setAddress] = useState({
+    name: "",
     firstname: "",
     lastname: "",
     email: "",
     street: "",
     city: "",
     state: "",
-    zipcode: "",
+    pincode: "",
     country: "",
     phone: "",
   });
 
-  const { addresses = [], setAddresses, navigate } = useAppContext();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const newAddress = {
-      ...address,
-      _id: Date.now().toString(),
-    };
-    setAddresses([newAddress, ...addresses]);
-    toast.success("Address added successfully!");
-    navigate("/cart");
+
+    if (!user || !user._id) {
+      toast.error("Please login to add an address");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      // Combine firstname and lastname for the name field
+      const fullName = `${address.firstname} ${address.lastname}`.trim();
+
+      const addressData = {
+        ...address,
+        name: fullName,
+        userId: user._id,
+        pincode: address.pincode || address.zipcode, // Use pincode if available, fallback to zipcode
+      };
+
+      // Remove any undefined or null values
+      Object.keys(addressData).forEach((key) => {
+        if (addressData[key] === undefined || addressData[key] === null) {
+          delete addressData[key];
+        }
+      });
+
+      const { data } = await axios.post("/api/address/add", {
+        address: addressData,
+      });
+
+      if (data.success) {
+        toast.success(data.message);
+        navigate("/cart");
+      } else {
+        toast.error(data.message || "Failed to add address");
+      }
+    } catch (error) {
+      console.error("Address submission error:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to add address. Please try again."
+      );
+    }
   };
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/cart");
+    }
+  }, [user, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     setAddress((prevAddress) => ({
       ...prevAddress,
       [name]: value,

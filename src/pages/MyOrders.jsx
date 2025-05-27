@@ -3,13 +3,12 @@ import { useAppContext } from "../context/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { assets } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
-import { dummyOrders } from "../assets/assets";
 
 const MyOrders = () => {
-  const { user } = useAppContext();
+  const { user, axios } = useAppContext();
   const navigate = useNavigate();
-  const [orders, setOrders] = useState(dummyOrders);
-  const [loading, setLoading] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
 
   const getStatusColor = (status) => {
@@ -20,12 +19,44 @@ const MyOrders = () => {
         return "bg-blue-100 text-blue-800";
       case "cancelled":
         return "bg-red-100 text-red-800";
-      case "order placed":
+      case "pending":
         return "bg-yellow-100 text-yellow-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
   };
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`/api/order/user?userId=${user._id}`);
+      if (response.data.success) {
+        // Sort orders by date, newest first
+        const sortedOrders = response.data.orders.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setOrders(sortedOrders);
+      }
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchOrders();
+    }
+  }, [user]);
+
+  // Refresh orders every 30 seconds
+  useEffect(() => {
+    if (user) {
+      const interval = setInterval(fetchOrders, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
 
   const filteredOrders = orders.filter((order) => {
     if (activeTab === "all") return true;
@@ -82,21 +113,23 @@ const MyOrders = () => {
 
       {/* Order Status Tabs */}
       <div className="flex gap-4 mb-8 overflow-x-auto pb-2">
-        {["all", "processing", "delivered", "cancelled"].map((tab) => (
-          <motion.button
-            key={tab}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setActiveTab(tab)}
-            className={`px-6 py-2 rounded-full whitespace-nowrap transition ${
-              activeTab === tab
-                ? "bg-primary text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
-          >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-          </motion.button>
-        ))}
+        {["all", "pending", "processing", "delivered", "cancelled"].map(
+          (tab) => (
+            <motion.button
+              key={tab}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setActiveTab(tab)}
+              className={`px-6 py-2 rounded-full whitespace-nowrap transition ${
+                activeTab === tab
+                  ? "bg-primary text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </motion.button>
+          )
+        )}
       </div>
 
       {/* Orders List */}
@@ -144,7 +177,7 @@ const MyOrders = () => {
                   <div className="flex flex-wrap justify-between items-center gap-4">
                     <div>
                       <h3 className="text-lg font-semibold text-gray-800">
-                        Order #{order._id.slice(-6)}
+                        Order #{order.orderNumber}
                       </h3>
                       <p className="text-gray-500 text-sm mt-1">
                         Placed on{" "}
@@ -160,8 +193,7 @@ const MyOrders = () => {
                         {order.status}
                       </span>
                       <span className="text-sm text-gray-500">
-                        {order.paymentType}{" "}
-                        {order.isPaid ? "(Paid)" : "(Pending)"}
+                        {order.paymentStatus}
                       </span>
                     </div>
                   </div>
@@ -179,7 +211,7 @@ const MyOrders = () => {
                       >
                         <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                           <img
-                            src={item.product.image}
+                            src={item.product.image[0]}
                             alt={item.product.name}
                             className="w-full h-full object-cover"
                           />
@@ -192,12 +224,12 @@ const MyOrders = () => {
                             Quantity: {item.quantity}
                           </p>
                           <p className="text-sm text-gray-500">
-                            Price: MAD{item.product.price}
+                            Price: MAD{item.price}
                           </p>
                         </div>
                         <div className="text-right">
                           <p className="font-semibold text-primary">
-                            MAD{(item.product.price * item.quantity).toFixed(2)}
+                            MAD{(item.price * item.quantity).toFixed(2)}
                           </p>
                         </div>
                       </motion.div>
@@ -212,15 +244,15 @@ const MyOrders = () => {
                           Delivery Address
                         </p>
                         <p className="text-gray-800">
-                          {typeof order.address === "object"
-                            ? `${order.address.street}, ${order.address.city}, ${order.address.state} ${order.address.zipcode}`
-                            : order.address}
+                          {order.shippingAddress
+                            ? `${order.shippingAddress.street}, ${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.zipCode}`
+                            : "Address not available"}
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-500">Total Amount</p>
                         <p className="text-xl font-bold text-primary">
-                          MAD{order.amount}
+                          MAD{order.totalAmount}
                         </p>
                       </div>
                     </div>

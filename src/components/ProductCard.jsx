@@ -75,13 +75,13 @@ const ProductCard = ({ product }) => {
       {/* Price & Cart Section */}
       <div className="w-full flex flex-col items-center px-4 mt-1 mb-4 flex-1 justify-end">
         <div className="flex flex-col items-center mb-3">
-          <span className="text-2xl sm:text-3xl font-bold text-primary">
-            {currency}MAD{product.offerPrice}
-          </span>
-          {product.offerPrice < product.price && (
-            <span className="text-gray-400 text-sm sm:text-base line-through font-normal mt-1">
-              {currency}MAD{product.price}
-            </span>
+          <div className="text-lg font-semibold text-gray-900">
+            MAD {product.price}
+          </div>
+          {product.offerPrice && (
+            <div className="text-sm text-gray-500 line-through">
+              MAD {product.offerPrice}
+            </div>
           )}
         </div>
 

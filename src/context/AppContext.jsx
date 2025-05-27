@@ -26,17 +26,23 @@ export const AppContextProvider = ({ children }) => {
         withCredentials: true,
       });
       if (data.success) {
-        setUser(data.user);
+        // Store user data AND the token if available
+        setUser({ ...data.user, token: data.token }); // Assuming backend sends token in data.token
         setCartItems(data.user.cartItems || {});
       } else {
         setUser(null);
         setCartItems({});
       }
     } catch (error) {
-      // Don't log 401 errors as they're expected when not logged in
-      if (error.response?.status !== 401) {
-        console.error("Auth check error:", error);
+      // Silently handle 401 errors as they're expected when not logged in
+      if (error.response?.status === 401) {
+        setUser(null);
+        setCartItems({});
+        return;
       }
+
+      // Log other errors
+      console.error("Auth check error:", error);
       setUser(null);
       setCartItems({});
     }
@@ -50,6 +56,12 @@ export const AppContextProvider = ({ children }) => {
       });
       setIsSeller(data.success);
     } catch (error) {
+      // Silently handle 401 errors as they're expected when not logged in
+      if (error.response?.status === 401) {
+        setIsSeller(false);
+        return;
+      }
+
       console.error("Seller auth check error:", error);
       setIsSeller(false);
     }
@@ -70,6 +82,25 @@ export const AppContextProvider = ({ children }) => {
     }
   };
 
+  // Helper to sync cart with backend Cart collection
+  const syncCartWithBackend = async (newCart) => {
+    if (!user || !user._id) return;
+    try {
+      const response = await axios.post("/api/cart/update", {
+        userId: user._id,
+        cartItems: newCart || {},
+      });
+
+      if (!response.data.success) {
+        console.error("Failed to sync cart:", response.data.message);
+        toast.error("Failed to sync cart with server");
+      }
+    } catch (err) {
+      console.error("Failed to sync cart with backend:", err);
+      toast.error("Failed to sync cart with server");
+    }
+  };
+
   const addToCart = (itemId) => {
     let cartData = structuredClone(cartItems);
     if (cartData[itemId]) {
@@ -77,9 +108,9 @@ export const AppContextProvider = ({ children }) => {
     } else {
       cartData[itemId] = 1;
     }
-
     setCartItems(cartData);
     toast.success("Item added to cart");
+    syncCartWithBackend(cartData);
   };
 
   // Update Cart Item Quantity
@@ -88,19 +119,23 @@ export const AppContextProvider = ({ children }) => {
     cartData[itemId] = quantity;
     setCartItems(cartData);
     toast.success("Cart Updated");
+    syncCartWithBackend(cartData);
   };
 
   const removeFromCart = (productId) => {
     setCartItems((prevItems) => {
       const currentCount = prevItems[productId] || 0;
+      let newCart;
       if (currentCount <= 1) {
         const { [productId]: _, ...rest } = prevItems;
-        return rest;
+        newCart = rest;
+      } else {
+        newCart = { ...prevItems, [productId]: currentCount - 1 };
       }
-      return { ...prevItems, [productId]: currentCount - 1 };
+      toast.success("Remove from Cart");
+      syncCartWithBackend(newCart);
+      return newCart;
     });
-
-    toast.success("Remove from Cart");
   };
 
   const getCartCount = () => {
