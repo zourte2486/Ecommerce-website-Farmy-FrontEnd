@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAppContext } from "../../context/AppContext";
 import { toast } from "react-hot-toast";
-import { motion } from "framer-motion";
 
 const OrdersList = () => {
   const { axios } = useAppContext();
