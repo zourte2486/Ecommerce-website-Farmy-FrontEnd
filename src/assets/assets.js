@@ -102,43 +102,43 @@ export const assets = {
 
 export const categories = [
   {
-    text: "Organic veggies",
+    text: "Légumes Bio",
     path: "Vegetables",
     image: organic_vegitable_image,
     bgColor: "#FEF6DA",
   },
   {
-    text: "Fresh Fruits",
+    text: "Fruits Frais",
     path: "Fruits",
     image: fresh_fruits_image,
     bgColor: "#FEE0E0",
   },
   {
-    text: "Cold Drinks",
+    text: "Boissons Fraîches",
     path: "Drinks",
     image: bottles_image,
     bgColor: "#F0F5DE",
   },
   {
-    text: "Instant Food",
+    text: "Plats Instantanés",
     path: "Instant",
     image: maggi_image,
     bgColor: "#E1F5EC",
   },
   {
-    text: "Dairy Products",
+    text: "Produits Laitiers",
     path: "Dairy",
     image: dairy_product_image,
     bgColor: "#FEE6CD",
   },
   {
-    text: "Bakery & Breads",
+    text: "Boulangerie & Pains",
     path: "Bakery",
     image: bakery_image,
     bgColor: "#E0F6FE",
   },
   {
-    text: "Grains & Cereals",
+    text: "Céréales & Grains",
     path: "Grains",
     image: grain_image,
     bgColor: "#F1E3F9",
@@ -147,27 +147,27 @@ export const categories = [
 
 export const footerLinks = [
   {
-    title: "Quick Links",
+    title: "Liens Rapides",
     links: [
-      { text: "Home", url: "#" },
-      { text: "Best Sellers", url: "#" },
-      { text: "Offers & Deals", url: "#" },
-      { text: "Contact Us", url: "#" },
-      { text: "FAQs", url: "#" },
+      { text: "Accueil", url: "#" },
+      { text: "Meilleures Ventes", url: "#" },
+      { text: "Offres & Promos", url: "#" },
+      { text: "Nous Contacter", url: "#" },
+      { text: "FAQ", url: "#" },
     ],
   },
   {
-    title: "Need help?",
+    title: "Besoin d'aide ?",
     links: [
-      { text: "Delivery Information", url: "#" },
-      { text: "Return & Refund Policy", url: "#" },
-      { text: "Payment Methods", url: "#" },
-      { text: "Track your Order", url: "#" },
-      { text: "Contact Us", url: "#" },
+      { text: "Informations de Livraison", url: "#" },
+      { text: "Politique de Retour & Remboursement", url: "#" },
+      { text: "Modes de Paiement", url: "#" },
+      { text: "Suivre votre Commande", url: "#" },
+      { text: "Nous Contacter", url: "#" },
     ],
   },
   {
-    title: "Follow Us",
+    title: "Suivez-nous",
     links: [
       { text: "Instagram", url: "#" },
       { text: "Twitter", url: "#" },
@@ -180,23 +180,23 @@ export const footerLinks = [
 export const features = [
   {
     icon: delivery_truck_icon,
-    title: "Fastest Delivery",
-    description: "Groceries delivered in under 30 minutes.",
+    title: "Livraison Ultra Rapide",
+    description: "Produits livrés en moins de 30 minutes.",
   },
   {
     icon: leaf_icon,
-    title: "Freshness Guaranteed",
-    description: "Fresh produce straight from the source.",
+    title: "Fraîcheur Garantie",
+    description: "Produits frais directement de la source.",
   },
   {
     icon: coin_icon,
-    title: "Affordable Prices",
-    description: "Quality groceries at unbeatable prices.",
+    title: "Prix Abordables",
+    description: "Produits de qualité à prix imbattables.",
   },
   {
     icon: trust_icon,
-    title: "Trusted by Thousands",
-    description: "Loved by 10,000+ happy customers.",
+    title: "Une Confiance Établie",
+    description: "Adoré par plus de 10 000 clients satisfaits.",
   },
 ];
 
@@ -501,7 +501,7 @@ export const dummyProducts = [
     inStock: true,
   },
   {
-    _id: "ek64j45k",
+    _id: "ek64d45k",
     name: "Fanta 1.5L",
     category: "Drinks",
     price: 77,

@@ -16,6 +16,67 @@ const InputField = ({ type, placeholder, name, handleChange, address }) => (
   />
 );
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      when: "beforeChildren",
+      staggerChildren: 0.1,
+      duration: 0.3,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { type: "spring", stiffness: 300, damping: 24 },
+  },
+};
+
+const formControlVariants = {
+  hidden: { x: -20, opacity: 0 },
+  visible: {
+    x: 0,
+    opacity: 1,
+    transition: { type: "spring", stiffness: 300, damping: 24 },
+  },
+  hover: { scale: 1.02, transition: { duration: 0.2 } },
+};
+
+const imageVariants = {
+  hidden: { scale: 0.8, opacity: 0 },
+  visible: {
+    scale: 1,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 200,
+      damping: 20,
+      duration: 0.8,
+    },
+  },
+  float: {
+    y: [-20, 0, -20],
+    rotate: [-2, 2, -2],
+    transition: {
+      y: {
+        repeat: Infinity,
+        duration: 4,
+        ease: "easeInOut",
+      },
+      rotate: {
+        repeat: Infinity,
+        duration: 6,
+        ease: "easeInOut",
+      },
+    },
+  },
+};
+
 const AddAddress = () => {
   const {
     axios,
@@ -23,6 +84,7 @@ const AddAddress = () => {
     setAddresses,
     navigate,
     user,
+    fetchAddresses,
   } = useAppContext();
 
   const [address, setAddress] = useState({
@@ -42,23 +104,21 @@ const AddAddress = () => {
     e.preventDefault();
 
     if (!user || !user._id) {
-      toast.error("Please login to add an address");
+      toast.error("Veuillez vous connecter pour ajouter une adresse");
       navigate("/login");
       return;
     }
 
     try {
-      // Combine firstname and lastname for the name field
       const fullName = `${address.firstname} ${address.lastname}`.trim();
 
       const addressData = {
         ...address,
         name: fullName,
         userId: user._id,
-        pincode: address.pincode || address.zipcode, // Use pincode if available, fallback to zipcode
+        pincode: address.pincode || address.zipcode,
       };
 
-      // Remove any undefined or null values
       Object.keys(addressData).forEach((key) => {
         if (addressData[key] === undefined || addressData[key] === null) {
           delete addressData[key];
@@ -70,16 +130,17 @@ const AddAddress = () => {
       });
 
       if (data.success) {
-        toast.success(data.message);
+        toast.success("Adresse ajoutée avec succès");
+        await fetchAddresses();
         navigate("/cart");
       } else {
-        toast.error(data.message || "Failed to add address");
+        toast.error(data.message || "Échec de l'ajout de l'adresse");
       }
     } catch (error) {
       console.error("Address submission error:", error);
       toast.error(
         error.response?.data?.message ||
-          "Failed to add address. Please try again."
+          "Échec de l'ajout de l'adresse. Veuillez réessayer."
       );
     }
   };
@@ -97,122 +158,154 @@ const AddAddress = () => {
       [name]: value,
     }));
   };
-
   return (
-    <div className="flex flex-col md:flex-row items-center justify-center min-h-[70vh] gap-10 px-4 md:px-0 mt-16">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="flex flex-col md:flex-row items-center justify-center min-h-[70vh] gap-10 px-4 md:px-0 mt-16"
+    >
       {/* Form Section */}
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-        <h2 className="text-2xl font-bold text-primary-dull mb-6">
-          Add New Address
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="grid grid-cols-2 gap-4">
+      <motion.div
+        variants={itemVariants}
+        className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 border border-gray-100 relative z-10"
+      >
+        <motion.h2
+          variants={itemVariants}
+          className="text-2xl font-bold text-primary-dull mb-6"
+        >
+          Ajouter une nouvelle adresse
+        </motion.h2>
+        <motion.form
+          onSubmit={handleSubmit}
+          className="space-y-5"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div
+            variants={formControlVariants}
+            whileHover="hover"
+            className="grid grid-cols-2 gap-4"
+          >
             <InputField
               handleChange={handleChange}
               type="text"
-              placeholder="First Name"
+              placeholder="Prénom"
               name="firstname"
               address={address}
             />
             <InputField
               handleChange={handleChange}
               type="text"
-              placeholder="Last Name"
+              placeholder="Nom"
               name="lastname"
               address={address}
             />
-          </div>
-          <InputField
-            handleChange={handleChange}
-            type="email"
-            placeholder="Email"
-            name="email"
-            address={address}
-          />
-          <InputField
-            handleChange={handleChange}
-            type="text"
-            placeholder="Street Address"
-            name="street"
-            address={address}
-          />
-          <div className="grid grid-cols-2 gap-4">
+          </motion.div>
+          <motion.div variants={formControlVariants} whileHover="hover">
+            <InputField
+              handleChange={handleChange}
+              type="email"
+              placeholder="Email"
+              name="email"
+              address={address}
+            />
+          </motion.div>
+          <motion.div variants={formControlVariants} whileHover="hover">
             <InputField
               handleChange={handleChange}
               type="text"
-              placeholder="City"
+              placeholder="Adresse"
+              name="street"
+              address={address}
+            />
+          </motion.div>
+          <motion.div
+            variants={formControlVariants}
+            whileHover="hover"
+            className="grid grid-cols-2 gap-4"
+          >
+            <InputField
+              handleChange={handleChange}
+              type="text"
+              placeholder="Ville"
               name="city"
               address={address}
             />
             <InputField
               handleChange={handleChange}
               type="text"
-              placeholder="State"
+              placeholder="État/Province"
               name="state"
               address={address}
             />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
+          </motion.div>
+          <motion.div
+            variants={formControlVariants}
+            whileHover="hover"
+            className="grid grid-cols-2 gap-4"
+          >
             <InputField
               handleChange={handleChange}
               type="text"
-              placeholder="ZIP Code"
+              placeholder="Code Postal"
               name="zipcode"
               address={address}
             />
             <InputField
               handleChange={handleChange}
               type="text"
-              placeholder="Country"
+              placeholder="Pays"
               name="country"
               address={address}
             />
-          </div>
-          <InputField
-            handleChange={handleChange}
-            type="tel"
-            placeholder="Phone Number"
-            name="phone"
-            address={address}
-          />
-          <button
+          </motion.div>
+          <motion.div variants={formControlVariants} whileHover="hover">
+            <InputField
+              handleChange={handleChange}
+              type="tel"
+              placeholder="Numéro de téléphone"
+              name="phone"
+              address={address}
+            />
+          </motion.div>
+          <motion.button
             type="submit"
-            className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dull transition-colors"
+            variants={itemVariants}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dull transition-colors shadow-lg"
           >
-            Add Address
-          </button>
-        </form>
-      </div>
+            Ajouter l'adresse
+          </motion.button>
+        </motion.form>
+      </motion.div>
 
-      {/* Image Section */}
+      {/* Image Section (desktop only) */}
       <div className="hidden md:flex flex-1 items-center justify-center relative max-w-xl">
         {/* Blur background with your colors */}
-        <div
+        <motion.div
           className="absolute inset-0 rounded-3xl filter blur-3xl opacity-40"
           style={{
             background:
               "linear-gradient(135deg, var(--color-primary), var(--color-primary-dull))",
           }}
           aria-hidden="true"
-        ></div>
-
+          variants={imageVariants}
+          initial="hidden"
+          animate="visible"
+        ></motion.div>
         <motion.img
           src={assets.add_address_iamge}
           alt="Add Address Illustration"
           className="relative max-w-md w-full rounded-3xl drop-shadow-2xl"
-          initial={{ y: 0 }}
-          animate={{
-            y: [0, -20, 0], // bounce animation
-          }}
-          transition={{
-            duration: 2,
-            ease: "easeInOut",
-            repeat: Infinity,
-            repeatType: "loop",
-          }}
+          variants={imageVariants}
+          initial="hidden"
+          animate={["visible", "float"]}
         />
       </div>
-    </div>
+    </motion.div>
   );
 };
 

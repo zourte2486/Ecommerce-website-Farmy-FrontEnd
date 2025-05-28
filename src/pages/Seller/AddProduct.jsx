@@ -19,30 +19,63 @@ const AddProduct = () => {
   // Filter categories to show only the specified ones
   const filteredCategories = categories.filter((category) =>
     [
-      "Organic veggies",
-      "Fresh Fruits",
-      "Cold Drinks",
-      "Dairy Products",
-      "Bakery & Breads",
-      "Grains & Cereals",
+      "Légumes Bio",
+      "Fruits Frais",
+      "Boissons Fraîches",
+      "Produits Laitiers",
+      "Boulangerie & Pains",
+      "Céréales & Grains",
     ].includes(category.text)
   );
 
-  const handleInputChange = (e) => {
-    const { name, value, checked } = e.target;
+  const handleImageChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    const totalFiles = files.length + selectedFiles.length;
 
-    switch (name) {
+    if (totalFiles > 4) {
+      toast.error("Vous pouvez télécharger au maximum 4 images");
+      return;
+    }
+
+    if (selectedFiles.some((file) => file.size > 5 * 1024 * 1024)) {
+      toast.error("Chaque image doit faire moins de 5MB");
+      return;
+    }
+
+    setFiles([...files, ...selectedFiles]);
+
+    const previews = selectedFiles.map((file) => URL.createObjectURL(file));
+    setPreviewImages([...previewImages, ...previews]);
+  };
+
+  const removeImage = (index) => {
+    const newFiles = [...files];
+    newFiles.splice(index, 1);
+    setFiles(newFiles);
+
+    const newPreviews = [...previewImages];
+    URL.revokeObjectURL(newPreviews[index]);
+    newPreviews.splice(index, 1);
+    setPreviewImages(newPreviews);
+  };
+
+  const handleInputChange = (e) => {
+    const { name: fieldName, value, checked } = e.target;
+    switch (fieldName) {
       case "name":
         setName(value);
-        break;
-      case "price":
-        setPrice(value);
         break;
       case "description":
         setDescription(value);
         break;
+      case "price":
+        setPrice(value);
+        break;
       case "category":
         setCategory(value);
+        break;
+      case "offerPrice":
+        setOfferPrice(value);
         break;
       case "stock":
         setStock(checked);
@@ -52,47 +85,6 @@ const AddProduct = () => {
     }
   };
 
-  const handleImageChange = (e) => {
-    const newFiles = Array.from(e.target.files);
-
-    // Check if adding new files would exceed the limit
-    if (files.length + newFiles.length > 4) {
-      toast.error("You can only upload up to 4 images");
-      return;
-    }
-
-    // Validate each file
-    const validFiles = newFiles.filter((file) => {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error(`${file.name} is too large. Max size is 5MB`);
-        return false;
-      }
-      if (!file.type.startsWith("image/")) {
-        toast.error(`${file.name} is not an image file`);
-        return false;
-      }
-      return true;
-    });
-
-    if (validFiles.length > 0) {
-      setFiles((prev) => [...prev, ...validFiles]);
-
-      // Create previews for new files
-      validFiles.forEach((file) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setPreviewImages((prev) => [...prev, reader.result]);
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-  };
-
-  const removeImage = (index) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-    setPreviewImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
   const handleSubmit = async (e) => {
     try {
       e.preventDefault();
@@ -100,23 +92,23 @@ const AddProduct = () => {
 
       // Validate required fields
       if (!name.trim()) {
-        toast.error("Please enter product name");
+        toast.error("Veuillez saisir le nom du produit");
         return;
       }
       if (!price || parseFloat(price) <= 0) {
-        toast.error("Please enter a valid price");
+        toast.error("Veuillez saisir un prix valide");
         return;
       }
       if (!category) {
-        toast.error("Please select a category");
+        toast.error("Veuillez sélectionner une catégorie");
         return;
       }
       if (!description.trim()) {
-        toast.error("Please enter product description");
+        toast.error("Veuillez saisir la description du produit");
         return;
       }
       if (!files.length) {
-        toast.error("Please upload at least one image");
+        toast.error("Veuillez télécharger au moins une image");
         return;
       }
 
@@ -135,7 +127,7 @@ const AddProduct = () => {
         inStock: stock,
       };
 
-      console.log("Submitting product data:", productData); // Debug log
+      console.log("Envoi des données du produit:", productData); // Debug log
 
       const formData = new FormData();
       formData.append("productData", JSON.stringify(productData));
@@ -144,9 +136,9 @@ const AddProduct = () => {
         formData.append("image", file);
       });
 
-      console.log("FormData contents:", {
+      console.log("Contenu du FormData:", {
         productData: formData.get("productData"),
-        imageCount: files.length,
+        nombreImages: files.length,
       }); // Debug log
 
       const { data } = await axios.post("/api/product/add", formData, {
@@ -157,7 +149,7 @@ const AddProduct = () => {
           const percentCompleted = Math.round(
             (progressEvent.loaded * 100) / progressEvent.total
           );
-          console.log("Upload progress:", percentCompleted);
+          console.log("Progression du téléchargement:", percentCompleted);
         },
       });
 
@@ -173,10 +165,10 @@ const AddProduct = () => {
         setFiles([]);
         setPreviewImages([]);
       } else {
-        toast.error(data.message || "Failed to add product");
+        toast.error(data.message || "Échec de l'ajout du produit");
       }
     } catch (error) {
-      console.error("Error details:", {
+      console.error("Détails de l'erreur:", {
         message: error.message,
         response: error.response?.data,
         status: error.response?.status,
@@ -186,22 +178,26 @@ const AddProduct = () => {
       if (error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else if (error.response?.status === 413) {
-        toast.error("File size too large. Please upload smaller images.");
+        toast.error(
+          "Fichier trop volumineux. Veuillez télécharger des images plus petites."
+        );
       } else if (error.response?.status === 415) {
-        toast.error("Invalid file type. Please upload image files only.");
+        toast.error(
+          "Type de fichier invalide. Veuillez télécharger uniquement des images."
+        );
       } else if (error.response?.status === 401) {
-        toast.error("Please login to add products");
+        toast.error("Veuillez vous connecter pour ajouter des produits");
       } else if (error.response?.status === 403) {
-        toast.error("You don't have permission to add products");
+        toast.error("Vous n'avez pas la permission d'ajouter des produits");
       } else if (error.response?.status === 404) {
         toast.error(
-          "API endpoint not found. Please check the server configuration."
+          "Point d'accès API introuvable. Veuillez vérifier la configuration du serveur."
         );
       } else if (error.response?.status === 500) {
-        toast.error("Server error. Please try again later.");
+        toast.error("Erreur serveur. Veuillez réessayer plus tard.");
       } else {
         toast.error(
-          error.message || "Failed to add product. Please try again."
+          error.message || "Échec de l'ajout du produit. Veuillez réessayer."
         );
       }
     } finally {
@@ -213,7 +209,7 @@ const AddProduct = () => {
     <div className="bg-white rounded-lg shadow">
       <div className="p-6">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-          Add New Product
+          Ajouter un nouveau produit
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -222,7 +218,7 @@ const AddProduct = () => {
                 htmlFor="name"
                 className="block text-sm font-semibold text-gray-700 mb-2"
               >
-                Product Name
+                Nom du produit
               </label>
               <input
                 type="text"
@@ -231,7 +227,7 @@ const AddProduct = () => {
                 value={name}
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
-                placeholder="Enter product name"
+                placeholder="Entrez le nom du produit"
                 required
               />
             </div>
@@ -241,13 +237,11 @@ const AddProduct = () => {
                 htmlFor="price"
                 className="block text-sm font-semibold text-gray-700 mb-2"
               >
-                Price
+                Prix
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-500 sm:text-sm font-medium">
-                    MAD
-                  </span>
+                  <span className="text-gray-500 sm:text-sm">MAD</span>
                 </div>
                 <input
                   type="number"
@@ -255,10 +249,10 @@ const AddProduct = () => {
                   name="price"
                   value={price}
                   onChange={handleInputChange}
+                  className="w-full pl-12 pr-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
+                  placeholder="0.00"
                   step="0.01"
                   min="0"
-                  className="pl-16 w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
-                  placeholder="0.00"
                   required
                 />
               </div>
@@ -269,24 +263,22 @@ const AddProduct = () => {
                 htmlFor="offerPrice"
                 className="block text-sm font-semibold text-gray-700 mb-2"
               >
-                Offer Price (Optional)
+                Prix promotionnel (optionnel)
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-500 sm:text-sm font-medium">
-                    MAD
-                  </span>
+                  <span className="text-gray-500 sm:text-sm">MAD</span>
                 </div>
                 <input
                   type="number"
                   id="offerPrice"
                   name="offerPrice"
                   value={offerPrice}
-                  onChange={(e) => setOfferPrice(e.target.value)}
+                  onChange={handleInputChange}
+                  className="w-full pl-12 pr-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
+                  placeholder="0.00"
                   step="0.01"
                   min="0"
-                  className="pl-16 w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
-                  placeholder="0.00"
                 />
               </div>
             </div>
@@ -296,7 +288,7 @@ const AddProduct = () => {
                 htmlFor="category"
                 className="block text-sm font-semibold text-gray-700 mb-2"
               >
-                Category
+                Catégorie
               </label>
               <select
                 id="category"
@@ -306,7 +298,7 @@ const AddProduct = () => {
                 className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
                 required
               >
-                <option value="">Select a category</option>
+                <option value="">Sélectionnez une catégorie</option>
                 {filteredCategories.map((cat, index) => (
                   <option key={index} value={cat.path}>
                     {cat.text}
@@ -320,7 +312,7 @@ const AddProduct = () => {
                 htmlFor="stock"
                 className="block text-sm font-semibold text-gray-700 mb-2"
               >
-                Stock Status
+                État du stock
               </label>
               <div className="flex items-center space-x-4">
                 <label className="inline-flex items-center">
@@ -332,7 +324,7 @@ const AddProduct = () => {
                     onChange={handleInputChange}
                     className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary transition-colors duration-200"
                   />
-                  <span className="ml-2 text-sm text-gray-600">In Stock</span>
+                  <span className="ml-2 text-sm text-gray-600">En stock</span>
                 </label>
               </div>
             </div>
@@ -351,14 +343,14 @@ const AddProduct = () => {
                 onChange={handleInputChange}
                 rows="4"
                 className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
-                placeholder="Enter product description (each line will be treated as a separate bullet point)"
+                placeholder="Entrez la description du produit (chaque ligne sera traitée comme un point distinct)"
                 required
               />
             </div>
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Images (1-4 images)
+                Images du produit (1-4 images)
               </label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {previewImages.map((preview, index) => (
@@ -366,7 +358,7 @@ const AddProduct = () => {
                     <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-lg border-2 border-gray-300">
                       <img
                         src={preview}
-                        alt={`Preview ${index + 1}`}
+                        alt={`Aperçu ${index + 1}`}
                         className="h-full w-full object-cover"
                       />
                     </div>
@@ -400,7 +392,7 @@ const AddProduct = () => {
                     >
                       <div className="flex flex-col items-center justify-center pt-5 pb-6">
                         <svg
-                          className="w-8 h-8 mb-4 text-gray-500"
+                          className="w-8 h-8 text-gray-400"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -409,24 +401,23 @@ const AddProduct = () => {
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth="2"
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                            d="M12 4v16m8-8H4"
                           />
                         </svg>
-                        <p className="mb-2 text-sm text-gray-500">
-                          <span className="font-semibold">Click to upload</span>
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          PNG, JPG or JPEG (MAX. 5MB)
+                        <p className="mt-2 text-sm text-gray-500">
+                          {previewImages.length === 0
+                            ? "Ajouter des images"
+                            : "Ajouter plus d'images"}
                         </p>
                       </div>
                       <input
                         type="file"
                         id="image"
                         name="image"
-                        onChange={handleImageChange}
                         accept="image/*"
-                        className="hidden"
                         multiple
+                        onChange={handleImageChange}
+                        className="hidden"
                       />
                     </label>
                   </div>
@@ -443,7 +434,7 @@ const AddProduct = () => {
                 isLoading ? "opacity-50 cursor-not-allowed" : ""
               }`}
             >
-              {isLoading ? "Adding Product..." : "Add Product"}
+              {isLoading ? "Ajout du produit..." : "Ajouter le produit"}
             </button>
           </div>
         </form>

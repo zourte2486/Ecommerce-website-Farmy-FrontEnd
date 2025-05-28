@@ -45,13 +45,13 @@ const Login = () => {
         className="w-full max-w-md p-8 mx-auto bg-white rounded-lg shadow-lg"
       >
         <h2 className="mb-6 text-2xl font-semibold text-center text-gray-800">
-          {state === "login" ? "Login" : "Register"}
+          {state === "login" ? "Se Connecter" : "S'inscrire"}
         </h2>
         <form onSubmit={onSubmitHandler} className="space-y-4">
           {state === "register" && (
             <div>
               <label className="block mb-1 text-sm font-medium text-gray-700">
-                Name
+                Nom
               </label>
               <input
                 type="text"
@@ -76,7 +76,7 @@ const Login = () => {
           </div>
           <div>
             <label className="block mb-1 text-sm font-medium text-gray-700">
-              Password
+              Mot de passe
             </label>
             <input
               type="password"
@@ -90,18 +90,18 @@ const Login = () => {
             type="submit"
             className="w-full px-4 py-2 text-sm font-medium text-white bg-emerald-500 rounded-lg hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
           >
-            {state === "login" ? "Login" : "Register"}
+            {state === "login" ? "Se Connecter" : "S'inscrire"}
           </button>
         </form>
         <p className="mt-4 text-center text-gray-600">
           {state === "login"
-            ? "Don't have an account? "
-            : "Already have an account? "}
+            ? "Vous n'avez pas de compte ? "
+            : "Vous avez déjà un compte ? "}
           <button
             onClick={() => setState(state === "login" ? "register" : "login")}
             className="text-emerald-500 hover:text-emerald-600"
           >
-            {state === "login" ? "Register" : "Login"}
+            {state === "login" ? "S'inscrire" : "Se Connecter"}
           </button>
         </p>
       </div>

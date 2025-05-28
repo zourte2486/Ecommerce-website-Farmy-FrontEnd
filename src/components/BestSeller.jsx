@@ -36,7 +36,7 @@ const BestSeller = () => {
         className="flex flex-col items-start w-full mb-6 sm:mb-8"
       >
         <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-primary-dull">
-          Best Sellers
+          Meilleures Ventes
         </h2>
         <motion.div
           initial={{ width: 0 }}

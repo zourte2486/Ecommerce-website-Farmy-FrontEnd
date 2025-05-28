@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import CheckoutForm from "../components/CheckoutForm";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const CheckoutPage = () => {
   const {
@@ -14,12 +15,14 @@ const CheckoutPage = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchCart = async () => {
       try {
         setLoading(true);
         if (!user) {
-          setError("Please log in to view your cart.");
+          setError("Veuillez vous connecter pour voir votre panier.");
           setLoading(false);
           return;
         }
@@ -56,15 +59,14 @@ const CheckoutPage = () => {
               setCartItems(items);
               setTotalAmount(total);
             } else {
-              setError("Your cart is empty");
+              setError("Votre panier est vide");
             }
           } else {
-            setError("Your cart is empty");
+            setError("Votre panier est vide");
           }
         }
       } catch (err) {
         console.error("Error fetching cart:", err);
-        // Try context cart items as fallback on backend error
         if (Object.keys(contextCartItems).length > 0 && products?.length > 0) {
           const items = Object.entries(contextCartItems)
             .map(([productId, quantity]) => ({
@@ -84,10 +86,12 @@ const CheckoutPage = () => {
             setCartItems(items);
             setTotalAmount(total);
           } else {
-            setError("Your cart is empty");
+            setError("Votre panier est vide");
           }
         } else {
-          setError(err.response?.data?.message || "Failed to fetch cart");
+          setError(
+            err.response?.data?.message || "Échec du chargement du panier"
+          );
         }
       } finally {
         setLoading(false);
@@ -98,9 +102,9 @@ const CheckoutPage = () => {
       fetchCart();
     } else {
       setLoading(false);
-      setError("Please log in to view your cart.");
+      setError("Veuillez vous connecter pour voir votre panier.");
     }
-  }, [axios, user, contextCartItems, products]); // Added contextCartItems and products to dependencies
+  }, [user, contextCartItems, products, axios]);
 
   if (loading) {
     return (
@@ -115,14 +119,24 @@ const CheckoutPage = () => {
   }
 
   if (error) {
-    return <div className="text-center text-red-600 mt-8">Error: {error}</div>;
+    return (
+      <div className="text-center text-red-600 mt-8">Erreur : {error}</div>
+    );
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Checkout</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-8">Paiement</h1>
       {cartItems.length === 0 ? (
-        <div className="text-center text-gray-600">Your cart is empty.</div>
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">Votre panier est vide</p>
+          <button
+            onClick={() => navigate("/products")}
+            className="text-primary hover:underline"
+          >
+            Continuer les achats
+          </button>
+        </div>
       ) : (
         <CheckoutForm cartItems={cartItems} totalAmount={totalAmount} />
       )}

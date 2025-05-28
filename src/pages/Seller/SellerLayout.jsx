@@ -6,7 +6,6 @@ import { toast } from "react-hot-toast";
 const SellerLayout = ({ children }) => {
   const { axios, navigate } = useAppContext();
   const location = useLocation();
-  // const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const dashboardIcon = (
@@ -89,10 +88,18 @@ const SellerLayout = ({ children }) => {
   );
 
   const sidebarLinks = [
-    { name: "Dashboard", path: "/seller", icon: dashboardIcon },
-    { name: "Add Product", path: "/seller/add-product", icon: addProductIcon },
-    { name: "Products List", path: "/seller/products", icon: productsListIcon },
-    { name: "Orders List", path: "/seller/orders", icon: ordersIcon },
+    { name: "Tableau de bord", path: "/seller", icon: dashboardIcon },
+    {
+      name: "Ajouter un produit",
+      path: "/seller/add-product",
+      icon: addProductIcon,
+    },
+    {
+      name: "Liste des produits",
+      path: "/seller/products",
+      icon: productsListIcon,
+    },
+    { name: "Liste des commandes", path: "/seller/orders", icon: ordersIcon },
   ];
 
   const handleLogout = async () => {
@@ -119,7 +126,9 @@ const SellerLayout = ({ children }) => {
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           {isSidebarOpen && (
-            <h2 className="text-xl font-semibold text-gray-800">Admin Panel</h2>
+            <h2 className="text-xl font-semibold text-gray-800">
+              Panneau Admin
+            </h2>
           )}
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -165,15 +174,15 @@ const SellerLayout = ({ children }) => {
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-semibold text-gray-800">
               {sidebarLinks.find((item) => item.path === location.pathname)
-                ?.name || "Dashboard"}
+                ?.name || "Tableau de bord"}
             </h1>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-600">Welcome, Admin</span>
+              <span className="text-gray-600">Bienvenue, Admin</span>
               <button
                 onClick={handleLogout}
                 className="px-4 py-2 text-sm text-white bg-[#4fbf8b] rounded-lg hover:bg-[#44ae7c] transition-colors"
               >
-                Logout
+                Déconnexion
               </button>
             </div>
           </div>

@@ -53,7 +53,7 @@ const BottomBanner = () => {
             variants={itemVariants}
             className="text-2xl md:text-3xl font-semibold text-primary mb-6"
           >
-            Why we are the Best?
+            Pourquoi sommes-nous les meilleurs ?
           </motion.h1>
           {features.map((feature, index) => (
             <motion.div

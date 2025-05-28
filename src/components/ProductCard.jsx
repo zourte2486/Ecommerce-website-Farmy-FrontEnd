@@ -20,7 +20,7 @@ const ProductCard = ({ product }) => {
       }}
       className="relative bg-white border border-gray-100 rounded-3xl shadow-lg hover:shadow-2xl hover:scale-[1.03] transition-all duration-300 w-full flex flex-col items-center p-0 overflow-hidden min-h-[390px] group cursor-pointer"
       tabIndex={0}
-      aria-label={`View details for ${product.name}`}
+      aria-label={`Voir les détails de ${product.name}`}
     >
       {/* Top Badges */}
       <div className="absolute top-4 left-4 flex gap-2 z-10">
@@ -65,7 +65,7 @@ const ProductCard = ({ product }) => {
                 key={i}
                 className={`w-4 sm:w-5 ${i < 4 ? "" : "opacity-50"}`}
                 src={i < 4 ? assets.star_icon : assets.star_dull_icon}
-                alt={i < 4 ? "Filled star" : "Empty star"}
+                alt={i < 4 ? "Étoile pleine" : "Étoile vide"}
               />
             ))}
           <span className="text-xs text-gray-400 ml-1">(4)</span>
@@ -86,7 +86,6 @@ const ProductCard = ({ product }) => {
         </div>
 
         {/* Cart Actions */}
-        {/* Cart Actions */}
         <div
           onClick={(e) => e.stopPropagation()}
           className="w-full flex justify-center"
@@ -96,29 +95,27 @@ const ProductCard = ({ product }) => {
               className="flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-green-500 shadow-lg w-[120px] h-[42px] rounded-full cursor-pointer hover:from-green-500 hover:to-primary transition-all font-bold text-white text-base px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50"
               onClick={() => addToCart(product._id)}
               role="button"
-              aria-label="Add to cart"
+              aria-label="Ajouter au panier"
             >
-              Add
-              <PiShoppingCartSimpleBold color="white" />
+              Ajouter
+              <PiShoppingCartSimpleBold className="text-xl" />
             </button>
           ) : (
-            <div className="flex items-center gap-3 bg-primary/10 border border-primary/20 rounded-full px-3 py-2 shadow-md">
+            <div className="flex items-center gap-2 bg-white border-2 border-primary rounded-full p-1">
               <button
-                onClick={() => {
-                  removeFromCart(product._id);
-                }}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-primary font-bold text-xl hover:bg-red-100 hover:text-red-500 transition-colors focus:outline-none"
-                aria-label="Decrease quantity"
+                onClick={() => removeFromCart(product._id)}
+                className="w-8 h-8 flex items-center justify-center text-primary hover:bg-primary/10 rounded-full transition-colors"
+                aria-label="Retirer du panier"
               >
                 -
               </button>
-              <span className="w-8 text-center font-bold text-lg text-primary">
+              <span className="w-8 text-center font-medium">
                 {productCount}
               </span>
               <button
                 onClick={() => addToCart(product._id)}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-primary font-bold text-xl hover:bg-green-100 hover:text-green-600 transition-colors focus:outline-none"
-                aria-label="Increase quantity"
+                className="w-8 h-8 flex items-center justify-center text-primary hover:bg-primary/10 rounded-full transition-colors"
+                aria-label="Ajouter au panier"
               >
                 +
               </button>

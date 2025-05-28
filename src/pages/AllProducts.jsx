@@ -23,7 +23,7 @@ const AllProducts = () => {
     <div className="mt-8 sm:mt-16 px-2 sm:px-4 md:px-8">
       <div className="flex flex-col items-start w-full mb-4 sm:mb-8 px-2">
         <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-primary-dull uppercase">
-          All products
+          Tous les produits
         </p>
         <div className="w-16 h-0.5 bg-primary rounded-full mt-2"></div>
       </div>

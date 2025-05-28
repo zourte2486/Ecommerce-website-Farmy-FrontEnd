@@ -12,59 +12,79 @@ const Dashboard = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const { data } = await axios.get("/api/seller/dashboard");
-        console.log("Dashboard data received:", data); // Debug log
+  // Create a memoized version of fetchDashboardData so it doesn't change on rerenders
+  const fetchDashboardData = React.useCallback(async () => {
+    try {
+      const { data } = await axios.get("/api/seller/dashboard");
+      console.log("Données du tableau de bord reçues:", data);
 
-        if (data.success) {
-          setStats({
-            totalOrders: data.stats.totalOrders || 0,
-            totalProducts: data.stats.totalProducts || 0,
-            totalRevenue: data.stats.totalRevenue || 0,
-            recentOrders: data.stats.recentOrders || [],
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-        // Set default values in case of error
+      if (data.success) {
         setStats({
-          totalOrders: 0,
-          totalProducts: 0,
-          totalRevenue: 0,
-          recentOrders: [],
+          totalOrders: data.stats.totalOrders || 0,
+          totalProducts: data.stats.totalProducts || 0,
+          totalRevenue: data.stats.totalRevenue || 0,
+          recentOrders: data.stats.recentOrders || [],
         });
-      } finally {
-        setIsLoading(false);
       }
-    };
-
-    fetchDashboardData();
+    } catch (error) {
+      console.error(
+        "Erreur lors du chargement des données du tableau de bord:",
+        error
+      );
+      setStats({
+        totalOrders: 0,
+        totalProducts: 0,
+        totalRevenue: 0,
+        recentOrders: [],
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }, [axios]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex items-center justify-center h-64"
+      >
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full"
         />
-      </div>
+      </motion.div>
     );
   }
 
+  const translateStatus = (status) => {
+    const statusMap = {
+      pending: "En attente",
+      processing: "En traitement",
+      shipped: "Expédié",
+      delivered: "Livré",
+      cancelled: "Annulé",
+    };
+    return statusMap[status.toLowerCase()] || status;
+  };
+
   return (
     <div className="space-y-6">
-      {/* Stats Cards */}
+      {/* Cartes de statistiques */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-white p-6 rounded-lg shadow-md"
         >
-          <h3 className="text-lg font-semibold text-gray-700">Total Orders</h3>
+          <h3 className="text-lg font-semibold text-gray-700">
+            Total des commandes
+          </h3>
           <p className="text-3xl font-bold text-primary mt-2">
             {stats.totalOrders}
           </p>
@@ -77,7 +97,7 @@ const Dashboard = () => {
           className="bg-white p-6 rounded-lg shadow-md"
         >
           <h3 className="text-lg font-semibold text-gray-700">
-            Total Products
+            Total des produits
           </h3>
           <p className="text-3xl font-bold text-primary mt-2">
             {stats.totalProducts}
@@ -90,12 +110,12 @@ const Dashboard = () => {
           transition={{ delay: 0.2 }}
           className="bg-white p-6 rounded-lg shadow-md"
         >
-          <h3 className="text-lg font-semibold text-gray-700">Total Revenue</h3>
+          <h3 className="text-lg font-semibold text-gray-700">Revenu total</h3>
           <div className="text-3xl font-bold text-primary mt-2">
             MAD{" "}
             {stats.recentOrders
               .reduce((sum, order) => sum + (order.totalAmount || 0), 0)
-              .toLocaleString("en-US", {
+              .toLocaleString("fr-FR", {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}
@@ -103,7 +123,7 @@ const Dashboard = () => {
         </motion.div>
       </div>
 
-      {/* Recent Orders */}
+      {/* Commandes récentes */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -111,23 +131,25 @@ const Dashboard = () => {
         className="bg-white rounded-lg shadow-md"
       >
         <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800">Recent Orders</h2>
+          <h2 className="text-xl font-semibold text-gray-800">
+            Commandes récentes
+          </h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Order ID
+                  ID Commande
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
+                  Client
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
+                  Montant
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  Statut
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Date
@@ -161,11 +183,11 @@ const Dashboard = () => {
                             : "bg-red-100 text-red-800"
                         }`}
                       >
-                        {order.status}
+                        {translateStatus(order.status)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(order.createdAt).toLocaleDateString()}
+                      {new Date(order.createdAt).toLocaleDateString("fr-FR")}
                     </td>
                   </tr>
                 ))
@@ -175,7 +197,7 @@ const Dashboard = () => {
                     colSpan="5"
                     className="px-6 py-4 text-center text-gray-500"
                   >
-                    No recent orders
+                    Aucune commande récente
                   </td>
                 </tr>
               )}

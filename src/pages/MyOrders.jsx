@@ -76,16 +76,18 @@ const MyOrders = () => {
           className="w-24 mb-4 opacity-50"
         />
         <h2 className="text-2xl font-semibold text-gray-700 mb-2">
-          Login Required
+          Connexion Requise
         </h2>
-        <p className="text-gray-500 mb-4">Please login to view your orders</p>
+        <p className="text-gray-500 mb-4">
+          Veuillez vous connecter pour voir vos commandes
+        </p>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => navigate("/")}
           className="px-6 py-2 bg-primary hover:bg-primary-dull text-white rounded-full transition"
         >
-          Go to Login
+          Se Connecter
         </motion.button>
       </motion.div>
     );
@@ -104,166 +106,188 @@ const MyOrders = () => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="py-8"
-    >
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">My Orders</h1>
+    <div className="py-8">
+      <h1 className="text-2xl font-semibold mb-6">Mes Commandes</h1>
 
-      {/* Order Status Tabs */}
-      <div className="flex gap-4 mb-8 overflow-x-auto pb-2">
-        {["all", "pending", "processing", "delivered", "cancelled"].map(
-          (tab) => (
-            <motion.button
-              key={tab}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setActiveTab(tab)}
-              className={`px-6 py-2 rounded-full whitespace-nowrap transition ${
-                activeTab === tab
+      {orders.length === 0 ? (
+        <div className="text-center py-12">
+          <img
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z'%3E%3C/path%3E%3Cline x1='3' y1='6' x2='21' y2='6'%3E%3C/line%3E%3Cpath d='M16 10a4 4 0 0 1-8 0'%3E%3C/path%3E%3C/svg%3E"
+            alt="Aucune commande"
+            className="w-32 mx-auto mb-4 opacity-50"
+          />
+          <h2 className="text-xl font-medium text-gray-700 mb-2">
+            Aucune commande
+          </h2>
+          <p className="text-gray-500 mb-4">
+            Vous n'avez pas encore passé de commande
+          </p>
+          <button
+            onClick={() => navigate("/products")}
+            className="text-primary hover:underline"
+          >
+            Commencer vos achats
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="flex gap-4 mb-6 overflow-x-auto pb-2">
+            <button
+              onClick={() => setActiveTab("all")}
+              className={`px-4 py-2 rounded-full whitespace-nowrap ${
+                activeTab === "all"
                   ? "bg-primary text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </motion.button>
-          )
-        )}
-      </div>
-
-      {/* Orders List */}
-      <div className="space-y-6">
-        <AnimatePresence mode="wait">
-          {filteredOrders.length === 0 ? (
-            <motion.div
-              key="no-orders"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="text-center py-12"
+              Toutes
+            </button>
+            <button
+              onClick={() => setActiveTab("pending")}
+              className={`px-4 py-2 rounded-full whitespace-nowrap ${
+                activeTab === "pending"
+                  ? "bg-primary text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
             >
-              <img
-                src={assets.box_icon}
-                alt="No Orders"
-                className="w-24 mx-auto mb-4 opacity-50"
-              />
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                No Orders Found
-              </h3>
-              <p className="text-gray-500 mb-4">
-                You haven't placed any orders yet
-              </p>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => navigate("/products")}
-                className="px-6 py-2 bg-primary hover:bg-primary-dull text-white rounded-full transition"
-              >
-                Start Shopping
-              </motion.button>
-            </motion.div>
-          ) : (
-            filteredOrders.map((order) => (
-              <motion.div
+              En attente
+            </button>
+            <button
+              onClick={() => setActiveTab("processing")}
+              className={`px-4 py-2 rounded-full whitespace-nowrap ${
+                activeTab === "processing"
+                  ? "bg-primary text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              En cours
+            </button>
+            <button
+              onClick={() => setActiveTab("delivered")}
+              className={`px-4 py-2 rounded-full whitespace-nowrap ${
+                activeTab === "delivered"
+                  ? "bg-primary text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              Livrées
+            </button>
+            <button
+              onClick={() => setActiveTab("cancelled")}
+              className={`px-4 py-2 rounded-full whitespace-nowrap ${
+                activeTab === "cancelled"
+                  ? "bg-primary text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              Annulées
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            {filteredOrders.map((order) => (
+              <div
                 key={order._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+                className="bg-white rounded-lg shadow-md overflow-hidden"
               >
-                {/* Order Header */}
-                <div className="p-6 border-b border-gray-100">
-                  <div className="flex flex-wrap justify-between items-center gap-4">
+                <div className="p-4 border-b">
+                  <div className="flex justify-between items-start mb-2">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-800">
-                        Order #{order.orderNumber}
-                      </h3>
-                      <p className="text-gray-500 text-sm mt-1">
-                        Placed on{" "}
-                        {new Date(order.createdAt).toLocaleDateString()}
+                      <p className="text-sm text-gray-600">
+                        Commande #{order.orderNumber}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Passée le{" "}
+                        {new Date(order.createdAt).toLocaleDateString("fr-FR", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
                       </p>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <span
-                        className={`px-4 py-1 rounded-full text-sm font-medium ${getStatusColor(
-                          order.status
-                        )}`}
-                      >
-                        {order.status}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        {order.paymentStatus}
-                      </span>
+                    <div
+                      className={`px-3 py-1 rounded-full text-sm ${getStatusColor(
+                        order.status
+                      )}`}
+                    >
+                      {order.status === "pending" && "En attente"}
+                      {order.status === "processing" && "En cours"}
+                      {order.status === "delivered" && "Livrée"}
+                      {order.status === "cancelled" && "Annulée"}
                     </div>
                   </div>
-                </div>
 
-                {/* Order Items */}
-                <div className="p-6">
-                  <div className="space-y-6">
+                  <div className="mt-4">
                     {order.items.map((item) => (
-                      <motion.div
+                      <div
                         key={item._id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex gap-4 items-center"
+                        className="flex gap-4 items-center mb-4 last:mb-0"
                       >
-                        <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                          <img
-                            src={item.product.image[0]}
-                            alt={item.product.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex-grow">
-                          <h4 className="font-medium text-gray-800">
-                            {item.product.name}
-                          </h4>
-                          <p className="text-sm text-gray-500">
-                            Quantity: {item.quantity}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            Price: MAD{item.price}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-primary">
-                            MAD{(item.price * item.quantity).toFixed(2)}
-                          </p>
-                        </div>
-                      </motion.div>
+                        {item.product ? (
+                          <>
+                            <img
+                              src={
+                                item.product.image?.[0] ||
+                                assets.placeholder_image
+                              }
+                              alt={item.product.name}
+                              className="w-16 h-16 object-cover rounded-lg"
+                            />
+                            <div>
+                              <h4 className="font-medium">
+                                {item.product.name}
+                              </h4>
+                              <p className="text-sm text-gray-600">
+                                Quantité: {item.quantity}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                Prix: {item.price} MAD
+                              </p>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="flex gap-4 items-center">
+                            <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                              <span className="text-gray-400 text-xs text-center px-2">
+                                Produit non disponible
+                              </span>
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-gray-400">
+                                Produit supprimé
+                              </h4>
+                              <p className="text-sm text-gray-600">
+                                Quantité: {item.quantity}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                Prix: {item.price} MAD
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
 
-                  {/* Order Footer */}
-                  <div className="mt-6 pt-6 border-t border-gray-100">
+                  <div className="mt-4 pt-4 border-t">
                     <div className="flex justify-between items-center">
-                      <div>
-                        <p className="text-sm text-gray-500">
-                          Delivery Address
-                        </p>
-                        <p className="text-gray-800">
-                          {order.shippingAddress
-                            ? `${order.shippingAddress.street}, ${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.zipCode}`
-                            : "Address not available"}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500">Total Amount</p>
-                        <p className="text-xl font-bold text-primary">
-                          MAD{order.totalAmount}
-                        </p>
-                      </div>
+                      <p className="text-sm font-medium">Total</p>
+                      <p className="font-semibold">{order.totalAmount} MAD</p>
                     </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Mode de paiement:{" "}
+                      {order.paymentType === "COD"
+                        ? "Paiement à la livraison"
+                        : "Paiement en ligne"}
+                    </p>
                   </div>
                 </div>
-              </motion.div>
-            ))
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
   );
 };
 

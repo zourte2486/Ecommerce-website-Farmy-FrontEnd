@@ -3,7 +3,7 @@ import { useAppContext } from "./../../context/AppContext";
 import { toast } from "react-hot-toast";
 
 const ProductsList = () => {
-  const { products, axios, fetchProducts } = useAppContext();
+  const { products, setProducts, axios, fetchProducts } = useAppContext();
   const [editingProduct, setEditingProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editForm, setEditForm] = useState({
@@ -19,7 +19,7 @@ const ProductsList = () => {
       try {
         await fetchProducts();
       } catch (error) {
-        toast.error("Failed to load products");
+        toast.error("Échec du chargement des produits");
       } finally {
         setLoading(false);
       }
@@ -39,11 +39,11 @@ const ProductsList = () => {
         toast.success(data.message);
         await fetchProducts();
       } else {
-        toast.error(data.message || "Failed to update stock status");
+        toast.error(data.message || "Échec de la mise à jour du stock");
       }
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "Failed to update stock status"
+        error.response?.data?.message || "Échec de la mise à jour du stock"
       );
     } finally {
       setLoading(false);
@@ -51,10 +51,36 @@ const ProductsList = () => {
   };
 
   const handleDelete = async (productId) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) {
-      return;
-    }
+    toast(
+      (t) => (
+        <div className="flex flex-col gap-4">
+          <p>Êtes-vous sûr de vouloir supprimer ce produit ?</p>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+                confirmDelete(productId);
+              }}
+              className="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600 transition-colors"
+            >
+              Supprimer
+            </button>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="px-3 py-1 text-gray-700 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        duration: 6000,
+      }
+    );
+  };
 
+  const confirmDelete = async (productId) => {
     try {
       setLoading(true);
       const { data } = await axios.delete("/api/product/delete", {
@@ -62,13 +88,26 @@ const ProductsList = () => {
       });
 
       if (data.success) {
+        // Instead of fetching all products again, remove the deleted product from state
+        const updatedProducts = products.filter(
+          (product) => product._id !== productId
+        );
+        setProducts(updatedProducts);
+        toast.success(data.message);
+      } else {
+        toast.error(data.message || "Échec de la suppression du produit");
+      }
+
+      if (data.success) {
         toast.success(data.message);
         await fetchProducts();
       } else {
-        toast.error(data.message || "Failed to delete product");
+        toast.error(data.message || "Échec de la suppression du produit");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to delete product");
+      toast.error(
+        error.response?.data?.message || "Échec de la suppression du produit"
+      );
     } finally {
       setLoading(false);
     }
@@ -105,10 +144,12 @@ const ProductsList = () => {
         setEditingProduct(null);
         await fetchProducts();
       } else {
-        toast.error(data.message || "Failed to update product");
+        toast.error(data.message || "Échec de la mise à jour du produit");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to update product");
+      toast.error(
+        error.response?.data?.message || "Échec de la mise à jour du produit"
+      );
     } finally {
       setLoading(false);
     }
@@ -136,7 +177,9 @@ const ProductsList = () => {
   return (
     <div className="bg-white rounded-lg shadow-sm p-6">
       <div className="flex flex-col items-start w-full mb-8">
-        <h2 className="text-2xl font-semibold text-gray-800">Products List</h2>
+        <h2 className="text-2xl font-semibold text-gray-800">
+          Liste des produits
+        </h2>
         <div className="w-16 h-0.5 bg-gray-200 rounded-full mt-2"></div>
       </div>
       <div className="overflow-x-auto">
@@ -144,19 +187,19 @@ const ProductsList = () => {
           <thead>
             <tr>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Product
+                Produit
               </th>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Category
+                Catégorie
               </th>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Price
+                Prix
               </th>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Offer Price
+                Prix promotion
               </th>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Stock Status
+                État du stock
               </th>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                 Actions
@@ -167,7 +210,7 @@ const ProductsList = () => {
             {products.length === 0 ? (
               <tr>
                 <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
-                  No products found
+                  Aucun produit trouvé
                 </td>
               </tr>
             ) : (
@@ -183,7 +226,7 @@ const ProductsList = () => {
                           <div className="grid grid-cols-2 gap-6">
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Name
+                                Nom
                               </label>
                               <input
                                 type="text"
@@ -200,7 +243,7 @@ const ProductsList = () => {
                             </div>
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Category
+                                Catégorie
                               </label>
                               <input
                                 type="text"
@@ -217,7 +260,7 @@ const ProductsList = () => {
                             </div>
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Price
+                                Prix
                               </label>
                               <input
                                 type="number"
@@ -234,7 +277,7 @@ const ProductsList = () => {
                             </div>
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Offer Price
+                                Prix promotion
                               </label>
                               <input
                                 type="number"
@@ -250,7 +293,7 @@ const ProductsList = () => {
                             </div>
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Stock Status
+                                État du stock
                               </label>
                               <div className="flex items-center mt-2">
                                 <label className="relative inline-flex items-center cursor-pointer">
@@ -268,8 +311,8 @@ const ProductsList = () => {
                                   <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                   <span className="ml-3 text-sm text-gray-600">
                                     {editForm.inStock
-                                      ? "In Stock"
-                                      : "Out of Stock"}
+                                      ? "En stock"
+                                      : "Rupture de stock"}
                                   </span>
                                 </label>
                               </div>
@@ -281,13 +324,13 @@ const ProductsList = () => {
                               onClick={handleEditCancel}
                               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200"
                             >
-                              Cancel
+                              Annuler
                             </button>
                             <button
                               type="submit"
                               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-all duration-200"
                             >
-                              Save Changes
+                              Enregistrer les modifications
                             </button>
                           </div>
                         </form>
@@ -345,7 +388,9 @@ const ProductsList = () => {
                             />
                             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                             <span className="ml-3 text-sm text-gray-600">
-                              {product.inStock ? "In Stock" : "Out of Stock"}
+                              {product.inStock
+                                ? "En stock"
+                                : "Rupture de stock"}
                             </span>
                           </label>
                         </div>
@@ -355,13 +400,13 @@ const ProductsList = () => {
                           onClick={() => handleEdit(product)}
                           className="text-blue-600 hover:text-blue-800 mr-4 transition-colors duration-200"
                         >
-                          Edit
+                          Modifier
                         </button>
                         <button
                           onClick={() => handleDelete(product._id)}
                           className="text-red-600 hover:text-red-800 transition-colors duration-200"
                         >
-                          Delete
+                          Supprimer
                         </button>
                       </td>
                     </>

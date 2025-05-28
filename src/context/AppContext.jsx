@@ -18,6 +18,20 @@ export const AppContextProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState({});
   const [searchQuery, setsearchQuery] = useState("");
+  const [addresses, setAddresses] = useState([]);
+
+  // fetch user addresses
+  const fetchAddresses = async () => {
+    if (!user) return;
+    try {
+      const { data } = await axios.get("/api/address/get");
+      if (data.success) {
+        setAddresses(data.addresses);
+      }
+    } catch (error) {
+      console.error("Failed to fetch addresses:", error);
+    }
+  };
 
   // fetch user auth status, user data, cart items
   const fetchUser = async () => {
@@ -26,25 +40,27 @@ export const AppContextProvider = ({ children }) => {
         withCredentials: true,
       });
       if (data.success) {
-        // Store user data AND the token if available
-        setUser({ ...data.user, token: data.token }); // Assuming backend sends token in data.token
+        setUser({ ...data.user, token: data.token });
+        // Initialize cart items with a default empty object if none exists
         setCartItems(data.user.cartItems || {});
+        // Fetch addresses after user is set
+        await fetchAddresses();
       } else {
         setUser(null);
         setCartItems({});
+        setAddresses([]);
       }
     } catch (error) {
-      // Silently handle 401 errors as they're expected when not logged in
       if (error.response?.status === 401) {
         setUser(null);
         setCartItems({});
+        setAddresses([]);
         return;
       }
-
-      // Log other errors
       console.error("Auth check error:", error);
       setUser(null);
       setCartItems({});
+      setAddresses([]);
     }
   };
 
@@ -115,7 +131,9 @@ export const AppContextProvider = ({ children }) => {
 
   // Update Cart Item Quantity
   const updateCartItem = (itemId, quantity) => {
-    let cartData = structuredClone(cartItems);
+    if (!itemId || quantity < 1) return;
+
+    let cartData = structuredClone(cartItems || {});
     cartData[itemId] = quantity;
     setCartItems(cartData);
     toast.success("Cart Updated");
@@ -123,16 +141,21 @@ export const AppContextProvider = ({ children }) => {
   };
 
   const removeFromCart = (productId) => {
+    if (!productId) return;
+
     setCartItems((prevItems) => {
-      const currentCount = prevItems[productId] || 0;
+      const currentItems = prevItems || {};
+      const currentCount = currentItems[productId] || 0;
       let newCart;
+
       if (currentCount <= 1) {
-        const { [productId]: _, ...rest } = prevItems;
+        const { [productId]: _, ...rest } = currentItems;
         newCart = rest;
       } else {
-        newCart = { ...prevItems, [productId]: currentCount - 1 };
+        newCart = { ...currentItems, [productId]: currentCount - 1 };
       }
-      toast.success("Remove from Cart");
+
+      toast.success("Item removed from Cart");
       syncCartWithBackend(newCart);
       return newCart;
     });
@@ -192,6 +215,9 @@ export const AppContextProvider = ({ children }) => {
     getCartAmount,
     axios,
     fetchProducts,
+    addresses,
+    setAddresses,
+    fetchAddresses,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -24,7 +24,7 @@ const Newsletter = () => {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="text-2xl md:text-3xl font-semibold bg-gradient-to-r from-primary to-primary-dull bg-clip-text text-transparent"
       >
-        Never Miss a Deal!
+        Ne Manquez Aucune Offre !
       </motion.h1>
       <motion.p
         initial={{ opacity: 0, y: 20 }}
@@ -32,8 +32,8 @@ const Newsletter = () => {
         transition={{ duration: 0.5, delay: 0.3 }}
         className="md:text-lg text-gray-600 pb-8 max-w-2xl"
       >
-        Subscribe to get the latest offers, new arrivals, and exclusive
-        discounts
+        Abonnez-vous pour recevoir les dernières offres, nouveautés et remises
+        exclusives
       </motion.p>
       <motion.form
         initial={{ opacity: 0, y: 20 }}
@@ -45,7 +45,7 @@ const Newsletter = () => {
         <input
           className="h-full w-full px-4 text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary/20"
           type="email"
-          placeholder="Enter your email id"
+          placeholder="Entrez votre adresse email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -56,7 +56,7 @@ const Newsletter = () => {
           type="submit"
           className="md:px-12 px-8 h-full text-white bg-primary hover:bg-primary-dull transition-all cursor-pointer font-medium"
         >
-          Subscribe
+          S'abonner
         </motion.button>
       </motion.form>
     </motion.div>

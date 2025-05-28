@@ -29,11 +29,10 @@ const Navbar = () => {
         setCartItems({});
         navigate("/", { replace: true });
         setOpen(false);
-        toast.success("Logout successful");
+        toast.success("Déconnexion réussie");
       }
     } catch (error) {
       console.error("Logout error:", error);
-      // Even if the server request fails, clear the local state
       setUser(null);
       setCartItems({});
       navigate("/", { replace: true });
@@ -59,16 +58,16 @@ const Navbar = () => {
           to="/"
           className={({ isActive }) => (isActive ? "text-primary" : "")}
         >
-          Home
+          Accueil
         </NavLink>
         <NavLink
           to="/products"
           className={({ isActive }) => (isActive ? "text-primary" : "")}
         >
-          All Product
+          Tous les Produits
         </NavLink>
         <NavLink
-          to="/"
+          to="/contact"
           className={({ isActive }) => (isActive ? "text-primary" : "")}
         >
           Contact
@@ -79,9 +78,13 @@ const Navbar = () => {
             onChange={(e) => setsearchQuery(e.target.value)}
             className="py-1.5 w-full bg-transparent outline-none placeholder-gray-500"
             type="text"
-            placeholder="Search products"
+            placeholder="Rechercher des produits"
           />
-          <img src={assets.search_icon} alt="search_icon" className="w-4 h-4" />
+          <img
+            src={assets.search_icon}
+            alt="icône de recherche"
+            className="w-4 h-4"
+          />
         </div>
 
         <div
@@ -90,7 +93,7 @@ const Navbar = () => {
         >
           <img
             src={assets.nav_cart_icon}
-            alt="nav_cart_icon"
+            alt="icône du panier"
             className="w-6 opacity-80"
           />
           <button className="absolute -top-2 -right-3 text-xs text-white bg-primary w-[18px] h-[18px] rounded-full">
@@ -101,27 +104,51 @@ const Navbar = () => {
         {!user ? (
           <button
             onClick={() => setshowUserLogin(true)}
-            className="cursor-pointer px-8 py-2 bg-primary hover:bg-dull transition text-white rounded-full"
+            className="bg-primary text-white text-sm px-6 py-2 rounded-full"
           >
-            Login
+            Connexion
           </button>
         ) : (
-          <div className="relative group">
-            <img src={assets.profile_icon} alt="" className="w-10" />
-            <ul className="hidden group-hover:block absolute top-10 right-0 bg-white shadow border border-gray-200 py-2.5 w-30 rounded-md test-sm z-30">
-              <li
-                onClick={() => navigate("/my-orders")}
-                className="p-1.5 pl-3 hover:bg-primary/10 cursor-pointer"
-              >
-                My Orders
-              </li>
-              <li
-                onClick={logout}
-                className="p-1.5 pl-3 hover:bg-primary/10 cursor-pointer"
-              >
-                Logout
-              </li>
-            </ul>
+          <div className="relative">
+            <button
+              onClick={() => setOpen(!open)}
+              className="border border-gray-300 rounded-full h-9 w-9 flex items-center justify-center cursor-pointer"
+            >
+              {user.name.charAt(0).toUpperCase()}
+            </button>
+
+            {/* User Menu */}
+            {open && (
+              <div className="absolute top-12 right-0 bg-white border border-gray-300 rounded-lg shadow-lg p-4 w-52 space-y-2">
+                <p className="font-medium text-gray-900">{user.name}</p>
+                <p className="text-sm text-gray-600">{user.email}</p>
+                <hr />
+                <button
+                  onClick={() => {
+                    navigate("/profile");
+                    setOpen(false);
+                  }}
+                  className="text-gray-800 hover:text-primary w-full text-left"
+                >
+                  Mon Profil
+                </button>
+                <button
+                  onClick={() => {
+                    navigate("/my-orders");
+                    setOpen(false);
+                  }}
+                  className="text-gray-800 hover:text-primary w-full text-left"
+                >
+                  Mes Commandes
+                </button>
+                <button
+                  onClick={logout}
+                  className="text-red-600 hover:text-red-700 w-full text-left"
+                >
+                  Déconnexion
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -132,7 +159,7 @@ const Navbar = () => {
         >
           <img
             src={assets.nav_cart_icon}
-            alt="nav_cart_icon"
+            alt="icône du panier"
             className="w-6 opacity-80"
           />
           <button className="absolute -top-2 -right-3 text-xs text-white bg-primary w-[18px] h-[18px] rounded-full">
@@ -144,7 +171,7 @@ const Navbar = () => {
           aria-label="Menu"
           className=""
         >
-          <img src={assets.menu_icon} alt="menu_icon" className="" />
+          <img src={assets.menu_icon} alt="icône du menu" className="" />
         </button>
       </div>
 
@@ -164,7 +191,7 @@ const Navbar = () => {
               }`
             }
           >
-            Home
+            Accueil
           </NavLink>
           <NavLink
             to="/products"
@@ -175,25 +202,38 @@ const Navbar = () => {
               }`
             }
           >
-            All Products
+            Tous les Produits
           </NavLink>
 
           {user && (
-            <NavLink
-              to="/my-orders"
-              onClick={() => setOpen(false)}
-              className={({ isActive }) =>
-                `w-full py-2 hover:text-primary transition-colors duration-200 ${
-                  isActive ? "text-primary" : ""
-                }`
-              }
-            >
-              My Orders
-            </NavLink>
+            <>
+              <NavLink
+                to="/profile"
+                onClick={() => setOpen(false)}
+                className={({ isActive }) =>
+                  `w-full py-2 hover:text-primary transition-colors duration-200 ${
+                    isActive ? "text-primary" : ""
+                  }`
+                }
+              >
+                Mon Profil
+              </NavLink>
+              <NavLink
+                to="/my-orders"
+                onClick={() => setOpen(false)}
+                className={({ isActive }) =>
+                  `w-full py-2 hover:text-primary transition-colors duration-200 ${
+                    isActive ? "text-primary" : ""
+                  }`
+                }
+              >
+                Mes Commandes
+              </NavLink>
+            </>
           )}
 
           <NavLink
-            to="/"
+            to="/contact"
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
               `w-full py-2 hover:text-primary transition-colors duration-200 ${
@@ -214,7 +254,7 @@ const Navbar = () => {
               }}
               className="w-full cursor-pointer px-6 py-3 bg-primary hover:bg-dull transition-all duration-200 text-white rounded-lg text-sm font-medium"
             >
-              Login
+              Connexion
             </button>
           ) : (
             <button
@@ -224,7 +264,7 @@ const Navbar = () => {
               }}
               className="w-full cursor-pointer px-6 py-3 bg-primary hover:bg-dull transition-all duration-200 text-white rounded-lg text-sm font-medium"
             >
-              Logout
+              Déconnexion
             </button>
           )}
         </div>

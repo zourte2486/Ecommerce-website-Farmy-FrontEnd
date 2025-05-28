@@ -35,16 +35,23 @@ const ProductDetails = () => {
   if (!selectedProduct) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-500">
-        Loading...
+        Chargement...
       </div>
     );
   }
 
-  const productImages = [selectedProduct.image, selectedProduct.image];
+  const productImages = selectedProduct.image || [selectedProduct.image];
   const relatedProducts = products
     .filter(
       (p) =>
         p.category === selectedProduct.category && p._id !== selectedProduct._id
+    )
+    .slice(0, 6);
+
+  const otherProducts = products
+    .filter(
+      (p) =>
+        p.category !== selectedProduct.category && p._id !== selectedProduct._id
     )
     .slice(0, 4);
 
@@ -58,11 +65,11 @@ const ProductDetails = () => {
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
         <Link to="/" className="hover:text-primary">
-          Home
+          Accueil
         </Link>{" "}
         /
         <Link to="/products" className="hover:text-primary">
-          Products
+          Produits
         </Link>{" "}
         /
         <Link
@@ -103,132 +110,128 @@ const ProductDetails = () => {
           </motion.div>
         </motion.div>
 
-        {/* Info */}
-        <motion.div className="space-y-6">
+        {/* Product Info */}
+        <div className="space-y-6">
           <div>
-            <p className="text-sm text-primary uppercase">
-              {selectedProduct.category}
-            </p>
-            <h1 className="text-3xl font-bold text-gray-800 mt-1">
+            <h1 className="text-2xl md:text-3xl font-semibold mb-2">
               {selectedProduct.name}
             </h1>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {Array(5)
-              .fill("")
-              .map((_, i) => (
-                <img
-                  key={i}
-                  src={i < 4 ? assets.star_icon : assets.star_dull_icon}
-                  alt="rating"
-                  className="w-5"
-                />
-              ))}
-            <span className="ml-2 text-gray-500 text-sm">(4)</span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center">
+                {Array(5)
+                  .fill("")
+                  .map((_, i) => (
+                    <img
+                      key={i}
+                      className={`w-4 ${i < 4 ? "" : "opacity-50"}`}
+                      src={i < 4 ? assets.star_icon : assets.star_dull_icon}
+                      alt={i < 4 ? "Étoile pleine" : "Étoile vide"}
+                    />
+                  ))}
+              </div>
+              <span className="text-sm text-gray-500">(4.0)</span>
+            </div>
           </div>
 
           <div>
-            <div className="text-2xl font-bold text-gray-900">
-              MAD {selectedProduct.price}
+            <div className="flex items-baseline gap-4">
+              <h2 className="text-2xl font-semibold">
+                MAD {selectedProduct.offerPrice || selectedProduct.price}
+              </h2>
+              {selectedProduct.offerPrice && (
+                <span className="text-lg text-gray-500 line-through">
+                  MAD {selectedProduct.price}
+                </span>
+              )}
             </div>
             {selectedProduct.offerPrice && (
-              <div className="text-lg text-gray-500 line-through">
-                MAD {selectedProduct.offerPrice}
-              </div>
+              <p className="text-green-600 text-sm mt-1">
+                Économisez MAD{" "}
+                {(selectedProduct.price - selectedProduct.offerPrice).toFixed(
+                  2
+                )}
+              </p>
             )}
           </div>
 
           <div>
-            <h3 className="font-semibold text-lg mb-2">About Product</h3>
-            <ul className="text-gray-600 space-y-1">
-              <li>• Fresh and juicy</li>
-              <li>• Rich in antioxidants</li>
-              <li>• Perfect for snacking and salads</li>
+            <h3 className="font-medium mb-2">Description</h3>
+            <ul className="list-disc list-inside space-y-1 text-gray-600">
+              {selectedProduct.description.map((desc, index) => (
+                <li key={index}>{desc}</li>
+              ))}
             </ul>
           </div>
 
-          {/* Cart Controls */}
-          <div className="flex gap-4 items-center mb-4">
-            <div className="flex bg-gray-100 rounded-lg px-4 py-2 items-center justify-between w-32">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center border rounded-lg">
               <button
-                onClick={() =>
-                  cartItems[selectedProduct._id] > 0 &&
-                  removeFromCart(selectedProduct._id)
-                }
-                className="text-xl font-bold text-primary hover:text-red-500"
+                onClick={() => removeFromCart(selectedProduct._id)}
+                className="px-4 py-2 hover:bg-gray-100"
+                disabled={!cartItems[selectedProduct._id]}
               >
                 -
               </button>
-              <span className="text-lg font-medium">
+              <span className="px-4 py-2 border-x">
                 {cartItems[selectedProduct._id] || 0}
               </span>
               <button
                 onClick={() => addToCart(selectedProduct._id)}
-                className="text-xl font-bold text-primary hover:text-green-500"
+                className="px-4 py-2 hover:bg-gray-100"
               >
                 +
               </button>
             </div>
-          </div>
-
-          {/* Add to Cart and Buy Now Buttons */}
-          <div className="flex gap-4">
-            <button
-              onClick={() => addToCart(selectedProduct._id)}
-              className="flex-1 font-semibold py-3 px-6 bg-gray-100 text-gray-800/80 hover:bg-gray-200 rounded-lg transition"
-            >
-              Add to Cart
-            </button>
             <button
               onClick={() => {
                 addToCart(selectedProduct._id);
                 navigate("/cart");
               }}
-              className="flex-1 bg-primary hover:bg-primary-dull text-white font-semibold py-3 px-6 rounded-lg transition"
+              className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary/90"
             >
-              Buy Now
+              Acheter maintenant
             </button>
           </div>
-
-          <p
-            className={`flex items-center gap-2 ${
-              selectedProduct.inStock ? "text-green-600" : "text-red-500"
-            }`}
-          >
-            <span
-              className={`w-2 h-2 rounded-full ${
-                selectedProduct.inStock ? "bg-green-600" : "bg-red-500"
-              }`}
-            />
-            {selectedProduct.inStock ? "In Stock" : "Out of Stock"}
-          </p>
-        </motion.div>
+        </div>
       </div>
 
       {/* Related Products */}
       {relatedProducts.length > 0 && (
-        <div className="mt-12 border-t pt-8">
-          <h2 className="text-2xl font-bold text-primary-dull mb-6">
-            Related Products
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-            {relatedProducts.map((product, idx) => (
-              <motion.div key={product._id} variants={fadeIn} custom={idx}>
-                <ProductCard product={product} />
-              </motion.div>
+        <div className="mt-16">
+          <h2 className="text-xl font-semibold mb-6">Produits Similaires</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {relatedProducts.map((product) => (
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         </div>
       )}
 
-      <div className="text-center mt-16">
-        <button
-          onClick={() => navigate("/products")}
-          className="px-12 py-2.5 border rounded text-primary hover:bg-primary/10 transition"
+      {/* More Products Section */}
+      {otherProducts.length > 0 && (
+        <div className="mt-16">
+          <h2 className="text-xl font-semibold mb-6">Plus de Produits</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {otherProducts.map((product) => (
+              <ProductCard key={product._id} product={product} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* See More Button */}
+      <div className="mt-8 mb-16 flex justify-center">
+        <Link
+          to="/products"
+          className="bg-primary text-white px-8 py-3 rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
         >
-          See more
-        </button>
+          Voir Plus de Produits
+          <img
+            src={assets.arrow_right_icon_colored}
+            alt="Arrow right"
+            className="w-5 h-5 invert"
+          />
+        </Link>
       </div>
     </motion.div>
   );
